@@ -18,6 +18,8 @@ class Level:
         for obj in tmx_map.get_layer_by_name('Objects'):
             if obj.name == 'player':
                 Player((obj.x, obj.y), self.all_sprites)
-    def run(self):
+
+    def run(self, delta_time):
+        self.all_sprites.update(delta_time)
         self.display_surface.fill("black")
         self.all_sprites.draw(self.display_surface)
