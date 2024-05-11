@@ -21,6 +21,6 @@ class Level:
                 Player((obj.x, obj.y), self.all_sprites, self.collision_sprites)
 
     def run(self, delta_time):
-        self.all_sprites.update(delta_time)
         self.display_surface.fill("black")
+        self.all_sprites.update(delta_time)
         self.all_sprites.draw(self.display_surface)
