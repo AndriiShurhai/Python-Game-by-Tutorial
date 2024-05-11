@@ -1,4 +1,5 @@
 from settings import *
+from manual_timer import Timer 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites):
@@ -66,6 +67,10 @@ class Player(pygame.sprite.Sprite):
         if self.jump:
             if self.on_surface['floor']:
                 self.direction.y = -self.jump_height
+            elif any((self.on_surface['right'], self.on_surface['left'])):
+                self.direction.y = -self.jump_height
+                self.direction.x = 1 if self.on_surface['left'] else -1
+
             self.jump = False
 
     def collision(self, axis):
