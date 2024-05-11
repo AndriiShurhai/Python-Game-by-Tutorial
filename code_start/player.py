@@ -38,7 +38,7 @@ class Player(pygame.sprite.Sprite):
             input_vector.x -=1
 
         # using normilize() method to make sure the length of vector will be always one. And also we are checking
-        # if length if our vector is not equal to zero, because we cannot use normalize() in this situation
+        # if length of our vector is not equal to zero, because we cannot use normalize() in this situation
         self.direction.x = input_vector.normalize().x if input_vector else input_vector.x
 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
@@ -47,13 +47,19 @@ class Player(pygame.sprite.Sprite):
     def move(self, delta_time):
         # increasing position of the rect by speed in certain direction
 
+        # horizontal
         self.rect.x += self.direction.x * self.speed * delta_time 
         self.collision('horizontal')
 
+        # vertical
+        if not self.on_surface['floor'] and any((self.on_surface['right'], self.on_surface['left'])):
+            self.direction.y = 0
+            self.rect.y += self.gravity / 10 * delta_time
 
-        self.direction.y += self.gravity / 2 * delta_time
-        self.rect.y += self.direction.y * delta_time
-        self.direction.y += self.gravity / 2 * delta_time
+        else:
+            self.direction.y += self.gravity / 2 * delta_time
+            self.rect.y += self.direction.y * delta_time
+            self.direction.y += self.gravity / 2 * delta_time
 
         self.collision('vertical')
 
@@ -99,9 +105,6 @@ class Player(pygame.sprite.Sprite):
         self.on_surface['right'] = True if right_rect.collidelist(collide_rects) >= 0 else False
         self.on_surface['left'] = True if left_rect.collidelist(collide_rects) >= 0 else False 
 
-        pygame.draw.rect(self.display_surface, 'yellow', floor_rect)
-        pygame.draw.rect(self.display_surface, 'yellow', right_rect)
-        pygame.draw.rect(self.display_surface, 'yellow', left_rect)
 
     def update(self, delta_time):
         self.old_rect = self.rect.copy()
