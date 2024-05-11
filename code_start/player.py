@@ -26,21 +26,27 @@ class Player(pygame.sprite.Sprite):
             'right': False
         }
 
-        self.display_surface = pygame.display.get_surface()
+        # timer
+        self.timers = {
+            "wall jump": Timer(500),
+            "wall slide block": Timer(250)
+        }
     
     def input(self):
         keys = pygame.key.get_pressed()
 
         input_vector = vector()
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            input_vector.x += 1
 
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            input_vector.x -=1
+        if not self.timers['wall jump'].active:  # not allowing to user change x direction while we have wall kind jumping
+            if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                input_vector.x += 1
 
-        # using normilize() method to make sure the length of vector will be always one. And also we are checking
-        # if length of our vector is not equal to zero, because we cannot use normalize() in this situation
-        self.direction.x = input_vector.normalize().x if input_vector else input_vector.x
+            if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                input_vector.x -=1
+
+            # using normilize() method to make sure the length of vector will be always one. And also we are checking
+            # if length of our vector is not equal to zero, because we cannot use normalize() in this situation
+            self.direction.x = input_vector.normalize().x if input_vector else input_vector.x
 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             self.jump = True
@@ -53,7 +59,7 @@ class Player(pygame.sprite.Sprite):
         self.collision('horizontal')
 
         # vertical
-        if not self.on_surface['floor'] and any((self.on_surface['right'], self.on_surface['left'])):
+        if not self.on_surface['floor'] and any((self.on_surface['right'], self.on_surface['left'])) and not self.timers['wall slide block'].active:
             self.direction.y = 0
             self.rect.y += self.gravity / 10 * delta_time
 
@@ -63,13 +69,19 @@ class Player(pygame.sprite.Sprite):
             self.direction.y += self.gravity / 2 * delta_time
 
         self.collision('vertical')
-
+        
+        # checking how to execute jump logic
         if self.jump:
+            # checking if we are jumping while locating on the floor
             if self.on_surface['floor']:
                 self.direction.y = -self.jump_height
-            elif any((self.on_surface['right'], self.on_surface['left'])):
+                self.timers["wall slide block"].activate()
+
+            # check if we are jumping while can be colliding with some walls not on the floor
+            elif any((self.on_surface['right'], self.on_surface['left'])) and not self.timers['wall slide block'].active:
+                self.timers['wall jump'].activate() # activating wall jump timer to control jump frequency
                 self.direction.y = -self.jump_height
-                self.direction.x = 1 if self.on_surface['left'] else -1
+                self.direction.x = 1 if self.on_surface['left'] else -1  # changing x coordinate of player to jump in opposite side
 
             self.jump = False
 
@@ -99,20 +111,27 @@ class Player(pygame.sprite.Sprite):
                     self.direction.y = 0
 
     def check_contact(self):
-        floor_rect = pygame.Rect(self.rect.bottomleft, (self.rect.width, 2))
-        right_rect = pygame.Rect(self.rect.topright + vector(0, self.rect.height / 4), (2, self.rect.height / 2))
-        left_rect = pygame.Rect(self.rect.topleft + vector(-2, self.rect.height / 4), (2, self.rect.height / 2))
+        # creating rects that will surround our player to check side of needed collisions
+        floor_rect = pygame.Rect(self.rect.bottomleft, (self.rect.width, 2)) # rect that will be on the bottom side player
+        right_rect = pygame.Rect(self.rect.topright + vector(0, self.rect.height / 4), (2, self.rect.height / 2)) # player`s right side
+        left_rect = pygame.Rect(self.rect.topleft + vector(-2, self.rect.height / 4), (2, self.rect.height / 2)) # players`s left side
 
+        # generating all possibe rects that can be collided
         collide_rects = [sprite.rect for sprite in self.collision_sprites]
 
         # collisions
         self.on_surface['floor'] = True if floor_rect.collidelist(collide_rects) >= 0 else False
         self.on_surface['right'] = True if right_rect.collidelist(collide_rects) >= 0 else False
         self.on_surface['left'] = True if left_rect.collidelist(collide_rects) >= 0 else False 
+    
+    def update_timers(self):
+        for timer in self.timers.values():
+            timer.update()  # controlling every timer that we have automatically
 
 
     def update(self, delta_time):
         self.old_rect = self.rect.copy()
+        self.update_timers()
         self.input()
         self.move(delta_time)
         self.check_contact()

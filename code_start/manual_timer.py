@@ -10,7 +10,7 @@ class Timer:
 
     def activate(self):
         self.active = True
-        self.start_time = 0
+        self.start_time = get_ticks()
 
     def deactivate(self):
         self.active = False
