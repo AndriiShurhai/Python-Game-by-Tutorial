@@ -30,15 +30,14 @@ class Level:
                     move_direction = 'x'
                     start_pos = (move_obj.x, move_obj.y + move_obj.height / 2)
                     end_pos =  (move_obj.x + move_obj.width, move_obj.y + move_obj.height / 2)
+
                 else: # vertical movement
                     move_direction = 'y'
                     start_pos = (move_obj.x + move_obj.width / 2, move_obj.y)
                     end_pos = (move_obj.x + move_obj.width / 2, move_obj.y + move_obj.height)
                 speed = move_obj.properties['speed']
-                MovingSprite(self.all_sprites, start_pos, end_pos, move_direction, speed)
+                MovingSprite((self.all_sprites, self.collision_sprites), start_pos, end_pos, move_direction, speed)
                 
-
-
 
     def run(self, delta_time):
         self.display_surface.fill("black")
