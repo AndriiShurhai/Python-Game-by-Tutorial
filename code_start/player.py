@@ -18,8 +18,6 @@ class Player(pygame.sprite.Sprite):
         self.jump_height = 800
         self.jump = False
 
-        self.shift_down = False
-
         # collision
         self.collision_sprites = collision_sprites
         self.semi_collision_sprites = semi_collision_sprites
@@ -34,7 +32,8 @@ class Player(pygame.sprite.Sprite):
         # timer
         self.timers = {
             "wall jump": Timer(500),
-            "wall slide block": Timer(250)
+            "wall slide block": Timer(250),
+            "platform skip": Timer(300)
         }
     
     def input(self):
@@ -48,6 +47,9 @@ class Player(pygame.sprite.Sprite):
 
             if keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 input_vector.x -=1
+            
+            if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                self.timers["platform skip"].activate()
 
             # using normilize() method to make sure the length of vector will be always one. And also we are checking
             # if length of our vector is not equal to zero, because we cannot use normalize() in this situation
@@ -55,9 +57,7 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             self.jump = True
-        
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            self.shift_down = True
+    
 
     def move(self, delta_time):
         # increasing position of the rect by speed in certain direction
@@ -124,12 +124,14 @@ class Player(pygame.sprite.Sprite):
                     self.direction.y = 0
 
     def semi_collision(self):
-        for sprite in self.semi_collision_sprites:
-            if sprite.rect.colliderect(self.rect):
-                # bottom side collision
-                if self.rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
-                    self.rect.bottom = sprite.rect.top
-                    self.direction.y = 0
+        if not self.timers["platform skip"].active:
+            for sprite in self.semi_collision_sprites:
+                if sprite.rect.colliderect(self.rect):
+                    # bottom side collision
+                    if self.rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
+                        self.rect.bottom = sprite.rect.top
+                        if self.direction.y > 0:
+                            self.direction.y = 0
 
     def platform_move(self, delta_time):
         if self.platform:
