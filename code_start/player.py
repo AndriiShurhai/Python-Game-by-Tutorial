@@ -2,7 +2,7 @@ from settings import *
 from manual_timer import Timer 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, collision_sprites):
+    def __init__(self, pos, groups, collision_sprites, semi_collision_sprites):
         super().__init__(groups)
         self.image = pygame.Surface((48, 56))
         self.image.fill('red')
@@ -18,8 +18,11 @@ class Player(pygame.sprite.Sprite):
         self.jump_height = 800
         self.jump = False
 
+        self.shift_down = False
+
         # collision
         self.collision_sprites = collision_sprites
+        self.semi_collision_sprites = semi_collision_sprites
         self.on_surface = {
             'floor': False,
             'left': False,
@@ -52,6 +55,9 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             self.jump = True
+        
+        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            self.shift_down = True
 
     def move(self, delta_time):
         # increasing position of the rect by speed in certain direction
@@ -88,30 +94,41 @@ class Player(pygame.sprite.Sprite):
             self.jump = False
             
         self.collision('vertical')
+        self.semi_collision()
 
     def collision(self, axis):
         for sprite in self.collision_sprites:
             if sprite.rect.colliderect(self.rect):
                 if axis == 'horizontal':
                     # left side collision
-                    if self.rect.left <= sprite.rect.right and self.old_rect.left >= sprite.old_rect.right:
+                    if self.rect.left <= sprite.rect.right and int(self.old_rect.left) >= sprite.old_rect.right:
                         self.rect.left = sprite.rect.right
 
                     # right side collision
-                    if self.rect.right >= sprite.rect.left and self.old_rect.right <= sprite.old_rect.left:
+                    if self.rect.right >= sprite.rect.left and int(self.old_rect.right) <= sprite.old_rect.left:
                         self.rect.right = sprite.rect.left
 
                 else: # if axis == 'vertical'
                     
                     # top side collision
-                    if self.rect.top <= sprite.rect.bottom and self.old_rect.top >= sprite.old_rect.bottom:
+                    if self.rect.top <= sprite.rect.bottom and int(self.old_rect.top) >= sprite.old_rect.bottom:
                         self.rect.top = sprite.rect.bottom
+                        if hasattr(sprite, 'moving'):
+                            self.rect.top += 6
 
                     # bottom side collision
-                    if self.rect.bottom >= sprite.rect.top and self.old_rect.bottom <= sprite.old_rect.top:
+                    if self.rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
                         self.rect.bottom = sprite.rect.top
 
                     # if we have any vertical collisions, we are not apllying gravity
+                    self.direction.y = 0
+
+    def semi_collision(self):
+        for sprite in self.semi_collision_sprites:
+            if sprite.rect.colliderect(self.rect):
+                # bottom side collision
+                if self.rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
+                    self.rect.bottom = sprite.rect.top
                     self.direction.y = 0
 
     def platform_move(self, delta_time):
@@ -127,13 +144,16 @@ class Player(pygame.sprite.Sprite):
         # generating all possibe rects that can be collided
         collide_rects = [sprite.rect for sprite in self.collision_sprites]
 
+        semi_collide_rects = [sprite.rect for sprite in self.semi_collision_sprites]
+
         # collisions
-        self.on_surface['floor'] = True if floor_rect.collidelist(collide_rects) >= 0 else False
+        self.on_surface['floor'] = True if floor_rect.collidelist(collide_rects) >= 0  or floor_rect. collidelist(semi_collide_rects) >= 0  and self.direction.y >= 0 else False
         self.on_surface['right'] = True if right_rect.collidelist(collide_rects) >= 0 else False
         self.on_surface['left']  = True if left_rect.collidelist(collide_rects)  >= 0 else False 
 
         self.platform = None
-        for sprite in [sprite for sprite in self.collision_sprites.sprites() if hasattr(sprite, 'moving')]:
+        sprites = self.collision_sprites.sprites() + self.semi_collision_sprites.sprites()
+        for sprite in [sprite for sprite in sprites if hasattr(sprite, 'moving')]:
             if sprite.rect.colliderect(floor_rect):
                 self.platform = sprite
     
