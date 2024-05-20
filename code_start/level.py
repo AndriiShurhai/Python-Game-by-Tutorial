@@ -4,7 +4,7 @@ from player import Player
 from groups import AllSprites
 
 class Level:
-    def __init__(self, tmx_map):
+    def __init__(self, tmx_map, level_frames):
         self.display_surface = pygame.display.get_surface()
 
         # groups
@@ -12,9 +12,9 @@ class Level:
         self.collision_sprites = pygame.sprite.Group()
         self.semicollision_sprites = pygame.sprite.Group()
 
-        self.setup(tmx_map)
+        self.setup(tmx_map, level_frames)
 
-    def setup(self, tmx_map):
+    def setup(self, tmx_map, level_frames):
 
         # tiles
         for layer in ['BG', 'Terrain', 'FG', 'Platforms']:
@@ -33,6 +33,9 @@ class Level:
         for obj in tmx_map.get_layer_by_name('Objects'):
             if obj.name == 'player':
                 self.player = Player((obj.x, obj.y), self.all_sprites, self.collision_sprites, self.semicollision_sprites)
+            else:
+                if obj.name in ('barrel', 'crate'):
+                    Sprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
         
         # moving objects
         for move_obj in tmx_map.get_layer_by_name('Moving Objects'):
