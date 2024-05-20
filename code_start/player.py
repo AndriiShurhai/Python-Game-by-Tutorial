@@ -1,15 +1,16 @@
 from settings import *
 from manual_timer import Timer 
+from os.path import join
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites, semi_collision_sprites):
         super().__init__(groups)
-        self.image = pygame.Surface((48, 56))
-        self.image.fill('red')
+        self.image = pygame.image.load(join("..", "Python Game Tutorial", "graphics", "player", "idle", "0.png"))
 
         # rects
         self.rect = self.image.get_frect(topleft=pos)
-        self.old_rect = self.rect.copy()
+        self.hitbox_rect = self.rect.inflate(-76, -36)
+        self.old_rect = self.hitbox_rect.copy()
 
         # movement
         self.direction = vector()
@@ -63,17 +64,17 @@ class Player(pygame.sprite.Sprite):
         # increasing position of the rect by speed in certain direction
 
         # horizontal
-        self.rect.x += self.direction.x * self.speed * delta_time 
+        self.hitbox_rect.x += self.direction.x * self.speed * delta_time 
         self.collision('horizontal')
 
         # vertical
         if not self.on_surface['floor'] and any((self.on_surface['left'], self.on_surface['right'])) and not self.timers['wall slide block'].active:
             self.direction.y = 0
-            self.rect.y += self.gravity / 10 * delta_time
+            self.hitbox_rect.y += self.gravity / 10 * delta_time
 
         else:
             self.direction.y += self.gravity / 2 * delta_time
-            self.rect.y += self.direction.y * delta_time
+            self.hitbox_rect.y += self.direction.y * delta_time
             self.direction.y += self.gravity / 2 * delta_time
 
         
@@ -83,7 +84,7 @@ class Player(pygame.sprite.Sprite):
             if self.on_surface['floor']:
                 self.direction.y = -self.jump_height
                 self.timers["wall slide block"].activate()
-                self.rect.bottom -=1
+                self.hitbox_rect.bottom -=1
 
             # check if we are jumping while can be colliding with some walls not on the floor
             elif any((self.on_surface['left'], self.on_surface['right'])) and not self.timers['wall slide block'].active:
@@ -95,30 +96,31 @@ class Player(pygame.sprite.Sprite):
             
         self.collision('vertical')
         self.semi_collision()
+        self.rect.center = self.hitbox_rect.center
 
     def collision(self, axis):
         for sprite in self.collision_sprites:
-            if sprite.rect.colliderect(self.rect):
+            if sprite.rect.colliderect(self.hitbox_rect):
                 if axis == 'horizontal':
                     # left side collision
-                    if self.rect.left <= sprite.rect.right and int(self.old_rect.left) >= sprite.old_rect.right:
-                        self.rect.left = sprite.rect.right
+                    if self.hitbox_rect.left <= sprite.rect.right and int(self.old_rect.left) >= sprite.old_rect.right:
+                        self.hitbox_rect.left = sprite.rect.right
 
                     # right side collision
-                    if self.rect.right >= sprite.rect.left and int(self.old_rect.right) <= sprite.old_rect.left:
-                        self.rect.right = sprite.rect.left
+                    if self.hitbox_rect.right >= sprite.rect.left and int(self.old_rect.right) <= sprite.old_rect.left:
+                        self.hitbox_rect.right = sprite.rect.left
 
                 else: # if axis == 'vertical'
                     
                     # top side collision
-                    if self.rect.top <= sprite.rect.bottom and int(self.old_rect.top) >= sprite.old_rect.bottom:
-                        self.rect.top = sprite.rect.bottom
+                    if self.hitbox_rect.top <= sprite.rect.bottom and int(self.old_rect.top) >= sprite.old_rect.bottom:
+                        self.hitbox_rect.top = sprite.rect.bottom
                         if hasattr(sprite, 'moving'):
-                            self.rect.top += 6
+                            self.hitbox_rect.top += 6
 
                     # bottom side collision
-                    if self.rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
-                        self.rect.bottom = sprite.rect.top
+                    if self.hitbox_rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
+                        self.hitbox_rect.bottom = sprite.rect.top
 
                     # if we have any vertical collisions, we are not apllying gravity
                     self.direction.y = 0
@@ -126,22 +128,22 @@ class Player(pygame.sprite.Sprite):
     def semi_collision(self):
         if not self.timers["platform skip"].active:
             for sprite in self.semi_collision_sprites:
-                if sprite.rect.colliderect(self.rect):
+                if sprite.rect.colliderect(self.hitbox_rect):
                     # bottom side collision
-                    if self.rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
-                        self.rect.bottom = sprite.rect.top
+                    if self.hitbox_rect.bottom >= sprite.rect.top and int(self.old_rect.bottom) <= sprite.old_rect.top:
+                        self.hitbox_rect.bottom = sprite.rect.top
                         if self.direction.y > 0:
                             self.direction.y = 0
 
     def platform_move(self, delta_time):
         if self.platform:
-            self.rect.topleft += self.platform.direction * self.platform.speed * delta_time 
+            self.hitbox_rect.topleft += self.platform.direction * self.platform.speed * delta_time 
 
     def check_contact(self):
         # creating rects that will surround our player to check side of needed collisions
-        floor_rect = pygame.Rect(self.rect.bottomleft, (self.rect.width, 2)) # rect that will be on the bottom side player
-        right_rect = pygame.Rect(self.rect.topright + vector(0, self.rect.height / 4), (2, self.rect.height / 2)) # player`s right side
-        left_rect = pygame.Rect(self.rect.topleft + vector(-2, self.rect.height / 4), (2, self.rect.height / 2)) # players`s left side
+        floor_rect = pygame.Rect(self.hitbox_rect.bottomleft, (self.hitbox_rect.width, 2)) # rect that will be on the bottom side player
+        right_rect = pygame.Rect(self.hitbox_rect.topright + vector(0, self.hitbox_rect.height / 4), (2, self.hitbox_rect.height / 2)) # player`s right side
+        left_rect = pygame.Rect(self.hitbox_rect.topleft + vector(-2, self.hitbox_rect.height / 4), (2, self.hitbox_rect.height / 2)) # players`s left side
 
         # generating all possibe rects that can be collided
         collide_rects = [sprite.rect for sprite in self.collision_sprites]
@@ -165,7 +167,7 @@ class Player(pygame.sprite.Sprite):
 
 
     def update(self, delta_time):
-        self.old_rect = self.rect.copy()
+        self.old_rect = self.hitbox_rect.copy()
         self.update_timers()
         self.input()
         self.move(delta_time)
