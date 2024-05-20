@@ -1,12 +1,12 @@
 from settings import *
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, pos, surface=pygame.Surface((TILE_SIZE, TILE_SIZE)), groups=None):
+    def __init__(self, pos, surface=pygame.Surface((TILE_SIZE, TILE_SIZE)), groups=None, z = Z_LAYERS['main']):
         super().__init__(groups)
         self.image = surface
-        self.image.fill('gray')
         self.rect = self.image.get_frect(topleft=pos)
         self.old_rect = self.rect.copy()
+        self.z = z
 
 class MovingSprite(Sprite):
     def __init__(self, groups, start_pos, end_pos, move_direction, speed):
@@ -26,6 +26,8 @@ class MovingSprite(Sprite):
         self.speed = speed
         self.direction = vector(1, 0) if move_direction == 'x' else vector(0, 1)
         self.move_direction = move_direction
+
+        self.image.fill('gray')
 
     def check_border(self):
         # horizontal bounces

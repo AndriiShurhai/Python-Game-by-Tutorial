@@ -17,8 +17,17 @@ class Level:
     def setup(self, tmx_map):
 
         # tiles
-        for x, y, surface in tmx_map.get_layer_by_name('Terrain').tiles():
-            Sprite((x * TILE_SIZE, y * TILE_SIZE), surface, (self.all_sprites, self.collision_sprites))
+        for layer in ['BG', 'Terrain', 'FG', 'Platforms']:
+            for x, y, surface in tmx_map.get_layer_by_name(layer).tiles():
+                groups = [self.all_sprites]
+                if layer == 'Terrain': groups.append(self.collision_sprites)
+                if layer == 'Platforms': groups.append(self.semicollision_sprites)
+                match layer:
+                    case 'BG': z = Z_LAYERS['bg tiles']
+                    case 'FG': z = Z_LAYERS['fg']
+                    case _: z = Z_LAYERS['main']
+                
+                Sprite((x * TILE_SIZE, y * TILE_SIZE), surface, groups, z)
 
         # objects
         for obj in tmx_map.get_layer_by_name('Objects'):
