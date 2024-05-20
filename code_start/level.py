@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, MovingSprite
+from sprites import Sprite, MovingSprite, AnimatedSprite
 from player import Player
 from groups import AllSprites
 
@@ -36,6 +36,10 @@ class Level:
             else:
                 if obj.name in ('barrel', 'crate'):
                     Sprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
+                else:
+                    if 'palm' not in obj.name:
+                        frames = level_frames[obj.name]
+                        AnimatedSprite((obj.x, obj.y), frames, self.all_sprites)
         
         # moving objects
         for move_obj in tmx_map.get_layer_by_name('Moving Objects'):
