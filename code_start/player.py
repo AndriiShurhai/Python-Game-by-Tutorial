@@ -35,7 +35,8 @@ class Player(pygame.sprite.Sprite):
         self.timers = {
             "wall jump": Timer(500),
             "wall slide block": Timer(250),
-            "platform skip": Timer(100)
+            "platform skip": Timer(100),
+            "jumping": Timer(500)
         }
     
     def input(self):
@@ -59,6 +60,7 @@ class Player(pygame.sprite.Sprite):
 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             self.jump = True
+            self.timers['jumping'].activate()
     
 
     def move(self, delta_time):
@@ -99,6 +101,7 @@ class Player(pygame.sprite.Sprite):
         self.semi_collision()
         self.rect.center = self.hitbox_rect.center
 
+    
     def collision(self, axis):
         for sprite in self.collision_sprites:
             if sprite.rect.colliderect(self.hitbox_rect):
@@ -137,8 +140,8 @@ class Player(pygame.sprite.Sprite):
                             self.direction.y = 0
 
     def platform_move(self, delta_time):
-        if self.platform:
-            self.hitbox_rect.topleft += self.platform.direction * self.platform.speed * delta_time 
+        if self.platform and not self.timers['jumping'].active:
+            self.hitbox_rect.topleft += self.platform.direction * self.platform.speed * delta_time
 
     def check_contact(self):
         # creating rects that will surround our player to check side of needed collisions

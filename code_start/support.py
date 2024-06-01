@@ -2,10 +2,12 @@ from settings import *
 from os import walk
 from os.path import join
 
+# import a single frame
 def import_image(*path, alpha=True, format='png'):
     full_path = join(*path) + f'.{format}'
     return pygame.image.load(full_path).convert_alpha() if alpha else pygame.image.load(full_path).convert()
 
+# import all frames in the folder in list
 def import_folder(*path):
     frames = []
     for folder_path, subfloders, image_names in walk(join(*path)):
@@ -14,6 +16,7 @@ def import_folder(*path):
             frames.append(pygame.image.load(full_path).convert_alpha())
     return frames
 
+# import all frames in the folder in dictionary with lists
 def import_folder_dict(*path):
     frame_dict = {}
     for folder_path, _, image_names in walk(join(*path)):
@@ -23,6 +26,7 @@ def import_folder_dict(*path):
             frame_dict[image_name.split('.')[0]] = surface
     return frame_dict
 
+# import starting with parent folders
 def import_sub_folders(*path):
     frame_dict = {}
     for _, sub_folders, __ in walk(join(*path)):

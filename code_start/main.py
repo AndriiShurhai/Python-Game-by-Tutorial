@@ -13,7 +13,12 @@ class Game:
         self.import_assets()
 
         self.tmx_maps ={
-            0: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', 'omni.tmx'))
+            0: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', 'omni.tmx')),
+            1: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '0.tmx')),
+            2: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '1.tmx')),
+            3: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '2.tmx' )),
+            4: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '3.tmx'))
+
         } 
 
         self.current_stage = Level(self.tmx_maps[0], self.level_frames)
@@ -22,9 +27,15 @@ class Game:
         self.level_frames = {
             'flag': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'flag'),
             'saw': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies', 'saw', 'animation'),
-            'floor_spike': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies',  'floor_spikes')
+            'floor_spike': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies',  'floor_spikes'),
+            'palms': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'level', 'palms'),
+            'candle': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle'),
+            'window': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'window'),
+            'big_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'big_chains'),
+            'small_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'small_chains'),
+            'candle_light': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle light')
         }
-        print(self.level_frames)
+        print(self.level_frames['palms'])
 
     def run(self):
         while True:
