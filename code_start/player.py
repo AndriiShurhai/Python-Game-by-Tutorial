@@ -3,10 +3,15 @@ from manual_timer import Timer
 from os.path import join
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, collision_sprites, semi_collision_sprites):
+    def __init__(self, pos, groups, collision_sprites, semi_collision_sprites, frames):
+        # general setups
         super().__init__(groups)
-        self.image = pygame.image.load(join("..", "Python Game Tutorial", "graphics", "player", "Vasilko", "idle", "0.png"))
         self.z = Z_LAYERS['main']
+
+        # image
+        self.frames, self.frame_index = frames, 0
+        self.state, self.facing_right = 'idle', True
+        self.image = self.frames[self.state][self.frame_index]
 
         # rects
         self.rect = self.image.get_frect(topleft=pos)
@@ -19,6 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 1000
         self.jump_height = 800
         self.jump = False
+        self.attacking = False
 
         # collision
         self.collision_sprites = collision_sprites
@@ -36,7 +42,8 @@ class Player(pygame.sprite.Sprite):
             "wall jump": Timer(500),
             "wall slide block": Timer(250),
             "platform skip": Timer(100),
-            "jumping": Timer(500)
+            "jumping": Timer(500),
+            "attack block": Timer(500)
         }
     
     def input(self):
@@ -47,12 +54,17 @@ class Player(pygame.sprite.Sprite):
         if not self.timers['wall jump'].active:  # not allowing to user change x direction while we have wall kind jumping
             if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
                 input_vector.x += 1
+                self.facing_right = True
 
             if keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 input_vector.x -=1
+                self.facing_right = False
             
             if keys[pygame.K_DOWN] or keys[pygame.K_s]:
                 self.timers["platform skip"].activate()
+            
+            if keys[pygame.K_x]:
+                self.attack()
 
             # using normilize() method to make sure the length of vector will be always one. And also we are checking
             # if length of our vector is not equal to zero, because we cannot use normalize() in this situation
@@ -62,6 +74,11 @@ class Player(pygame.sprite.Sprite):
             self.jump = True
             self.timers['jumping'].activate()
     
+    def attack(self):
+        if not self.timers['attack block'].active:
+            self.attacking = True
+            self.frame_index = 0
+            self.timers["attack block"].activate()
 
     def move(self, delta_time):
         # increasing position of the rect by speed in certain direction
@@ -140,7 +157,7 @@ class Player(pygame.sprite.Sprite):
                             self.direction.y = 0
 
     def platform_move(self, delta_time):
-        if self.platform and not self.timers['jumping'].active:
+        if self.platform and not self.timers['jumping'].active and not self.timers['platform skip'].active:
             self.hitbox_rect.topleft += self.platform.direction * self.platform.speed * delta_time
 
     def check_contact(self):
@@ -169,11 +186,39 @@ class Player(pygame.sprite.Sprite):
         for timer in self.timers.values():
             timer.update()  # controlling every timer that we have automatically
 
+    def animate(self, delta_time):
+        self.frame_index += ANIMATION_SPEED * delta_time
+        if self.state == 'attack' and self.frame_index >= len(self.frames[self.state]):
+            self.state = 'idle'
+        self.image = self.frames[self.state][int(self.frame_index % len(self.frames[self.state]))]
+        self.image = self.image if self.facing_right else pygame.transform.flip(self.image, True, False)
+
+        if self.attacking and self.frame_index >= len(self.frames[self.state]):
+            self.attacking = False
+
+    def get_state(self):
+        if self.on_surface['floor']:
+            if self.attacking:
+                self.state = 'attack'
+            else:
+                self.state = 'idle' if self.direction.x == 0 else 'run'
+        else:
+            if self.attacking:
+                self.state = 'air_attack'
+            else:
+                if any([self.on_surface['left'], self.on_surface['right']]):
+                    self.state = 'wall'
+                else:
+                    self.state = 'jump' if self.direction.y < 0 else 'fall'
 
     def update(self, delta_time):
         self.old_rect = self.hitbox_rect.copy()
         self.update_timers()
+
         self.input()
         self.move(delta_time)
         self.platform_move(delta_time)
         self.check_contact()
+
+        self.get_state()
+        self.animate(delta_time)

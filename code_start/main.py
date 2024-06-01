@@ -21,7 +21,7 @@ class Game:
 
         } 
 
-        self.current_stage = Level(self.tmx_maps[0], self.level_frames)
+        self.current_stage = Level(self.tmx_maps[2], self.level_frames)
 
     def import_assets(self):
         self.level_frames = {
@@ -33,9 +33,9 @@ class Game:
             'window': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'window'),
             'big_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'big_chains'),
             'small_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'small_chains'),
-            'candle_light': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle light')
+            'candle_light': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle light'),
+            'player': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'player', 'Vasilko')
         }
-        print(self.level_frames['palms'])
 
     def run(self):
         while True:
