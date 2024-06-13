@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, MovingSprite, AnimatedSprite
+from sprites import Sprite, MovingSprite, AnimatedSprite, Spike
 from player import Player
 from groups import AllSprites
 from random import uniform
@@ -73,7 +73,26 @@ class Level:
         # moving objects
         for move_obj in tmx_map.get_layer_by_name('Moving Objects'):
             if move_obj.name == 'spike':
-                pass
+                Spike(
+                    position=(move_obj.x + move_obj.width//2, move_obj.y + move_obj.height//2),
+                    surface=level_frames['spike'],
+                    groups= (self.all_sprites, self.damage_sprites),
+                    radius=move_obj.properties['radius'],
+                    speed=move_obj.properties['speed'],
+                    start_angle=move_obj.properties['start_angle'],
+                    end_angle=move_obj.properties['end_angle']
+                    )
+                for radius in range(0, move_obj.properties['radius'], 15):
+                    Spike(
+                    position=(move_obj.x + move_obj.width//2, move_obj.y + move_obj.height//2),
+                    surface=level_frames['spike_chain'],
+                    groups=self.all_sprites,
+                    radius=radius,
+                    speed=move_obj.properties['speed'],
+                    start_angle=move_obj.properties['start_angle'],
+                    end_angle=move_obj.properties['end_angle'],
+                    z=Z_LAYERS['bg details']
+                    )
             else:
                 frames = level_frames[move_obj.name]
                 groups = (self.all_sprites, self.semi_collision_sprites) if move_obj.properties['platform'] else (self.all_sprites, self.damage_sprites)

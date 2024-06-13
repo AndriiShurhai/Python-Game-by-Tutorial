@@ -1,4 +1,5 @@
 from settings import *
+import math
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surface=pygame.Surface((TILE_SIZE, TILE_SIZE)), groups=None, z = Z_LAYERS['main']):
@@ -74,3 +75,34 @@ class MovingSprite(AnimatedSprite):
 
         if self.flip:
             self.image = pygame.transform.flip(self.image, self.reverse['x'], self.reverse['y'])
+
+class Spike(Sprite):
+    def __init__(self, position, surface, groups, radius, speed, start_angle, end_angle, z=Z_LAYERS['main']):
+        self.center = position
+        self.radius = radius
+        self.speed = speed
+        self.start_angle = start_angle
+        self.end_angle = end_angle
+        self.angle = self.start_angle
+        self.direction = 1
+        self.full_circle = True if self.angle == -1 else False
+
+        x = self.center[0] + self.radius * math.cos(math.radians(self.angle))
+        y = self.center[1] + self.radius * math.sin(math.radians(self.angle))
+
+        super().__init__((x, y), surface, groups, z)
+
+    def update(self, delta_time):
+        self.angle += self.direction * self.speed * delta_time 
+
+        if not self.full_circle:
+            if self.angle >= self.end_angle:
+                self.direction = -1
+            if self.angle < self.start_angle:
+                self.direction = 1
+
+        x = self.center[0] + self.radius * math.cos(math.radians(self.angle))
+        y = self.center[1] + self.radius * math.sin(math.radians(self.angle))
+
+        self.rect.center = (x,y)
+
