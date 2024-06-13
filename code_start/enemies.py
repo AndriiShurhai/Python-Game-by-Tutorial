@@ -31,3 +31,24 @@ class Tooth(pygame.sprite.Sprite):
         floor_rect_left.collidelist(self.collision_rects) < 0 and self.direction < 0:
              self.direction *= -1
         
+class Shell(pygame.sprite.Sprite):
+    def __init__(self, position, frames, groups, reverse):
+        super().__init__(groups)
+
+        if reverse:
+            self.frames = {}
+            for key, surfaces in frames.items():
+                self.frames[key] = [pygame.transform.flip(surface, True, False) for surface in surfaces]
+            self.bullet_direction = -1  
+        else:
+            self.frames = frames
+            self.bullet_direction = 1
+
+        self.frame_index = 0
+        self.state = 'idle'
+        self.image = self.frames[self.state][self.frame_index]
+
+        self.rect = self.image.get_rect(topleft=position)
+        self.old_rect = self.rect.copy()
+        self.z = Z_LAYERS['main']
+

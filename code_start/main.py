@@ -41,8 +41,7 @@ class Game:
             'spike': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'spike_ball', 'Spiked Ball'),
             'spike_chain': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'spike_ball', 'spiked_chain'),
             'tooth': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run'),
-
-
+            'shell': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell')
         }
 
     def run(self):
