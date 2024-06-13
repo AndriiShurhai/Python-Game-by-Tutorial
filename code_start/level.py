@@ -3,6 +3,7 @@ from sprites import Sprite, MovingSprite, AnimatedSprite, Spike
 from player import Player
 from groups import AllSprites
 from random import uniform
+from enemies import Tooth
 
 class Level:
     def __init__(self, tmx_map, level_frames):
@@ -13,6 +14,7 @@ class Level:
         self.collision_sprites = pygame.sprite.Group()
         self.semi_collision_sprites = pygame.sprite.Group()
         self.damage_sprites = pygame.sprite.Group()
+        self.tooth_sprites = pygame.sprite.Group()
 
         self.setup(tmx_map, level_frames)
 
@@ -120,6 +122,11 @@ class Level:
                         bottom, top = int(start_pos[1]), int(end_pos[1])
                         for y in range(bottom, top, 20):
                             Sprite((x, y), level_frames['saw_chain'], self.all_sprites, Z_LAYERS['bg details'])
+
+        # enemies
+        for obj in tmx_map.get_layer_by_name('Enemies'):
+            if obj.name == 'tooth':
+                Tooth((obj.x, obj.y), level_frames['tooth'], (self.all_sprites, self.damage_sprites, self.tooth_sprites), self.collision_sprites)
                 
 
     def run(self, delta_time):
