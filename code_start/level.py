@@ -72,7 +72,11 @@ class Level:
         
         # moving objects
         for move_obj in tmx_map.get_layer_by_name('Moving Objects'):
-            if move_obj.name == 'helicopter':
+            if move_obj.name == 'spike':
+                pass
+            else:
+                frames = level_frames[move_obj.name]
+                groups = (self.all_sprites, self.semi_collision_sprites) if move_obj.properties['platform'] else (self.all_sprites, self.damage_sprites)
                 if move_obj.width > move_obj.height: # horizontal movement
                     move_direction = 'x'
                     start_pos = (move_obj.x, move_obj.y + move_obj.height / 2)
@@ -83,7 +87,20 @@ class Level:
                     start_pos = (move_obj.x + move_obj.width / 2, move_obj.y)
                     end_pos = (move_obj.x + move_obj.width / 2, move_obj.y + move_obj.height)
                 speed = move_obj.properties['speed']
-                MovingSprite((self.all_sprites, self.semi_collision_sprites), start_pos, end_pos, move_direction, speed)
+                MovingSprite(frames, groups, start_pos, end_pos, move_direction, speed, move_obj.properties['flip'])
+
+                if move_obj.name == 'saw':
+                    print(move_obj.name)
+                    if move_direction == 'x':
+                        y = start_pos[1] - level_frames['saw_chain'].get_height() / 2 
+                        left, right = int(start_pos[0]), int(end_pos[0])
+                        for x in range(left, right, 20):
+                            Sprite((x, y), level_frames['saw_chain'], self.all_sprites, Z_LAYERS['bg details'])
+                    if move_direction == 'y':
+                        x = start_pos[0] - level_frames['saw_chain'].get_width() / 2
+                        bottom, top = int(start_pos[1]), int(end_pos[1])
+                        for y in range(bottom, top, 20):
+                            Sprite((x, y), level_frames['saw_chain'], self.all_sprites, Z_LAYERS['bg details'])
                 
 
     def run(self, delta_time):

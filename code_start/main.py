@@ -21,12 +21,13 @@ class Game:
 
         } 
 
-        self.current_stage = Level(self.tmx_maps[2], self.level_frames)
+        self.current_stage = Level(self.tmx_maps[0], self.level_frames)
 
     def import_assets(self):
         self.level_frames = {
             'flag': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'flag'),
             'saw': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies', 'saw', 'animation'),
+            'saw_chain': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'saw', 'saw_chain'),
             'floor_spike': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies',  'floor_spikes'),
             'palms': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'level', 'palms'),
             'candle': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle'),
@@ -34,7 +35,9 @@ class Game:
             'big_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'big_chains'),
             'small_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'small_chains'),
             'candle_light': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle light'),
-            'player': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'player', 'Vasilko')
+            'player': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'player', 'Vasilko'),
+            'helicopter': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'helicopter'),
+            'boat': import_folder('..', 'Python Game Tutorial', 'graphics', 'objects', 'boat')
         }
 
     def run(self):
