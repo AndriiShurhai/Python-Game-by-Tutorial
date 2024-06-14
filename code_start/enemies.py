@@ -16,8 +16,16 @@ class Tooth(pygame.sprite.Sprite):
 
         self.speed = 200
 
-    def update(self, delta_time):
+        self.hit_timer = Timer(250)
 
+    def reverse(self):
+        if not self.hit_timer.active:
+            self.direction *=-1
+            self.hit_timer.activate()
+
+    def update(self, delta_time):
+        
+        self.hit_timer.update()
         # animate
         self.frame_index += ANIMATION_SPEED * delta_time
         self.image = self.frames[int(self.frame_index % len(self.frames))]
@@ -129,8 +137,16 @@ class Pearl(pygame.sprite.Sprite):
         self.speed = speed
         self.z = Z_LAYERS['main']
 
+        self.hit_timer = Timer(250)
+
         self.velocity = pygame.math.Vector2(math.cos(angle), math.sin(angle)) * self.speed
 
+    
+    def reverse(self):
+        if not self.hit_timer.active:
+            self.velocity.x *= random.uniform(-10, -1)
+            self.velocity.y *= random.uniform(-10, -1)
+            self.hit_timer.activate()
     
     def update(self, delta_time):
         self.rect.x += self.velocity.x * delta_time
@@ -138,6 +154,5 @@ class Pearl(pygame.sprite.Sprite):
 
         if not pygame.display.get_surface().get_rect().contains(self.rect):
             self.kill()
-
-
-
+            
+        

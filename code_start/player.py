@@ -1,6 +1,7 @@
 from settings import *
 from manual_timer import Timer 
 from os.path import join
+import math
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites, semi_collision_sprites, frames):
@@ -43,7 +44,8 @@ class Player(pygame.sprite.Sprite):
             "wall slide block": Timer(250),
             "platform skip": Timer(100),
             "jumping": Timer(500),
-            "attack block": Timer(800)
+            "attack block": Timer(800),
+            "hit timer": Timer(400)
         }
     
     def input(self):
@@ -210,6 +212,17 @@ class Player(pygame.sprite.Sprite):
                     self.state = 'wall'
                 else:
                     self.state = 'jump' if self.direction.y < 0 else 'fall'
+    def get_damage(self):
+        if not self.timers['hit timer'].active:
+            print('player was damaged')
+            self.timers['hit timer'].activate()
+
+    def flicker(self):
+        if self.timers['hit timer'].active and math.sin(pygame.time.get_ticks()) >= 0:
+            white_mask = pygame.mask.from_surface(self.image)
+            white_surface = white_mask.to_surface()
+            white_surface.set_colorkey('black')
+            self.image = white_surface
 
     def update(self, delta_time):
         self.old_rect = self.hitbox_rect.copy()
@@ -222,3 +235,4 @@ class Player(pygame.sprite.Sprite):
 
         self.get_state()
         self.animate(delta_time)
+        self.flicker()
