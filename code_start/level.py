@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, MovingSprite, AnimatedSprite, Spike
+from sprites import Sprite, MovingSprite, AnimatedSprite, Spike, Item
 from player import Player
 from groups import AllSprites
 from random import uniform
@@ -16,6 +16,7 @@ class Level:
         self.damage_sprites = pygame.sprite.Group()
         self.tooth_sprites = pygame.sprite.Group()
         self.pearl_sprites = pygame.sprite.Group()
+        self.items_sprites = pygame.sprite.Group()
 
         self.pearl_surface = level_frames['pearl']
 
@@ -137,6 +138,9 @@ class Level:
                     groups=(self.all_sprites, self.collision_sprites), 
                     player=self.player, 
                     create_pearl=self.create_pearl)
+                
+        for obj in tmx_map.get_layer_by_name('Items'):
+            Item(obj.name, (obj.x + TILE_SIZE / 2, obj.y + TILE_SIZE / 2), level_frames['items'][obj.name], (self.all_sprites, self.items_sprites))
 
                 
     def create_pearl(self, position, angle):
@@ -153,10 +157,17 @@ class Level:
                 print('player damaged')
                 if type(sprite) == Pearl:
                     sprite.kill()
+    def item_collision(self):
+        if self.items_sprites:
+            item_sprites = pygame.sprite.spritecollide(self.player, self.items_sprites, True)
+            if item_sprites:
+                print('collison item')
+
 
     def run(self, delta_time):
         self.display_surface.fill("black")
         self.all_sprites.update(delta_time)
         self.pearl_collision() 
         self.hit_collision()
+        self.item_collision()
         self.all_sprites.draw(self.player.hitbox_rect.center)

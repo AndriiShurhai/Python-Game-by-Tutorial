@@ -22,6 +22,12 @@ class AnimatedSprite(Sprite):
     def update(self, delta_time):
         self.animate(delta_time)
 
+class Item(AnimatedSprite):
+    def __init__(self, item_type, position, frames, groups):
+        super().__init__(position, frames, groups)
+        self.rect.center = position
+        self.item_type = item_type
+
 class MovingSprite(AnimatedSprite):
     def __init__(self, frames, groups, start_pos, end_pos, move_direction, speed, flip=False):
         super().__init__(start_pos, frames, groups)

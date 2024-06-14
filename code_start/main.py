@@ -42,7 +42,8 @@ class Game:
             'spike_chain': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'spike_ball', 'spiked_chain'),
             'tooth': import_folder('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run'),
             'shell': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell'),
-            'pearl': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'bullets', 'pearl')
+            'pearl': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'bullets', 'pearl'),
+            'items': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'items')
         }
 
     def run(self):
