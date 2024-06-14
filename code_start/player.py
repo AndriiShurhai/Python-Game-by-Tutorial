@@ -4,7 +4,7 @@ from os.path import join
 import math
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, collision_sprites, semi_collision_sprites, frames):
+    def __init__(self, pos, groups, collision_sprites, semi_collision_sprites, frames, data):
         # general setups
         super().__init__(groups)
         self.z = Z_LAYERS['main']
@@ -45,8 +45,10 @@ class Player(pygame.sprite.Sprite):
             "platform skip": Timer(100),
             "jumping": Timer(500),
             "attack block": Timer(800),
-            "hit timer": Timer(400)
+            "hit timer": Timer(500)
         }
+
+        self.data = data
     
     def input(self):
         keys = pygame.key.get_pressed()
@@ -214,7 +216,7 @@ class Player(pygame.sprite.Sprite):
                     self.state = 'jump' if self.direction.y < 0 else 'fall'
     def get_damage(self):
         if not self.timers['hit timer'].active:
-            print('player was damaged')
+            self.data.health -=1
             self.timers['hit timer'].activate()
 
     def flicker(self):

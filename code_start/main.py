@@ -3,6 +3,8 @@ from level import Level
 from pytmx.util_pygame import load_pygame
 from os.path import join
 from support import *
+from data import Data
+from ui import UI
 
 class Game:
     def __init__(self):
@@ -12,16 +14,20 @@ class Game:
         self.clock = pygame.time.Clock()
         self.import_assets()
 
+        self.ui = UI(self.font, self.ui_frames)
+        self.data = Data(self.ui)
+
         self.tmx_maps ={
             0: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', 'omni.tmx')),
             1: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '0.tmx')),
             2: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '1.tmx')),
             3: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '2.tmx' )),
-            4: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '3.tmx'))
+            4: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '3.tmx')),
+            5: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '4.tmx'))
 
         } 
 
-        self.current_stage = Level(self.tmx_maps[0], self.level_frames)
+        self.current_stage = Level(self.tmx_maps[0], self.level_frames, self.data)
 
     def import_assets(self):
         self.level_frames = {
@@ -35,7 +41,7 @@ class Game:
             'big_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'big_chains'),
             'small_chain': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'small_chains'),
             'candle_light': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'candle light'),
-            'player': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'player', 'Vasilko'),
+            'player': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'player', 'Vasilko'),  # choosed_player_name
             'helicopter': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'helicopter'),
             'boat': import_folder('..', 'Python Game Tutorial', 'graphics', 'objects', 'boat'),
             'spike': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'spike_ball', 'Spiked Ball'),
@@ -47,6 +53,12 @@ class Game:
             'particle': import_folder('..', 'Python Game Tutorial', 'graphics', 'effects', 'particle')
         }
 
+        self.font = pygame.font.Font(join('..', 'Python Game Tutorial', 'graphics', 'ui', 'runescape_uf.ttf'), 40)
+        self.ui_frames = {
+            'heart': import_folder('..', 'Python Game Tutorial', 'graphics', 'ui', 'heart'),
+            'coin': import_image('..', 'Python Game Tutorial', 'graphics', 'ui', 'coin')
+        }
+
     def run(self):
         while True:
             delta_time = self.clock.tick() / 1000
@@ -55,6 +67,7 @@ class Game:
                     pygame.QUIT
                     sys.exit()
             self.current_stage.run(delta_time)
+            #self.ui.update(delta_time)
             pygame.display.update()
 
 if __name__ == '__main__':

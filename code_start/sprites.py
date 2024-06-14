@@ -1,5 +1,6 @@
 from settings import *
 import math
+import random
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surface=pygame.Surface((TILE_SIZE, TILE_SIZE)), groups=None, z = Z_LAYERS['main']):
@@ -22,11 +23,44 @@ class AnimatedSprite(Sprite):
     def update(self, delta_time):
         self.animate(delta_time)
 
+class Heart(AnimatedSprite):
+    def __init__(self, position, frames, groups):
+        super().__init__(position, frames, groups)
+        self.active = False
+
+    def animate(self, delta_time):
+        self.frame_index += ANIMATION_SPEED * delta_time
+        if self.frame_index < len(self.frames):
+            self.image = self.frames[int(self.frame_index)]
+        else:
+            self.active = False
+            self.frame_index = 0
+
+    def update(self, delta_time):
+        if self.active:
+            self.animate(delta_time)
+        else:
+            if random.randint(0, 2000) == 1:
+                self.active = True
+
 class Item(AnimatedSprite):
-    def __init__(self, item_type, position, frames, groups):
+    def __init__(self, item_type, position, frames, groups, data):
         super().__init__(position, frames, groups)
         self.rect.center = position
         self.item_type = item_type
+        self.data = data
+    def activate(self):
+        if self.item_type == 'gold':
+            self.data.coins += 5
+        if self.item_type == 'silver':
+            self.data.coins += 1
+        if self.item_type == 'diamond':
+            self.data.coins += 15
+        if self.item_type == 'skull':
+            self.data.coins += random.randint(1, 50)
+        
+        if self.item_type == 'portion':
+            self.health += 1 
 
 class ParticleEffect(AnimatedSprite):
     def __init__(self, position, frames, groups):

@@ -6,7 +6,7 @@ from random import uniform
 from enemies import Tooth, Shell, Pearl
 
 class Level:
-    def __init__(self, tmx_map, level_frames):
+    def __init__(self, tmx_map, level_frames, data):
         self.display_surface = pygame.display.get_surface()
 
         # groups
@@ -20,6 +20,8 @@ class Level:
 
         self.pearl_surface = level_frames['pearl']
         self.particle_frames = level_frames['particle']
+
+        self.data = data
 
         self.setup(tmx_map, level_frames)
 
@@ -54,7 +56,8 @@ class Level:
                     groups=self.all_sprites, 
                     collision_sprites=self.collision_sprites, 
                     semi_collision_sprites=self.semi_collision_sprites,
-                    frames=level_frames['player']
+                    frames=level_frames['player'],
+                    data=self.data
                     )
             else:
                 if obj.name in ('barrel', 'crate'):
@@ -141,7 +144,7 @@ class Level:
                     create_pearl=self.create_pearl)
                 
         for obj in tmx_map.get_layer_by_name('Items'):
-            Item(obj.name, (obj.x + TILE_SIZE / 2, obj.y + TILE_SIZE / 2), level_frames['items'][obj.name], (self.all_sprites, self.items_sprites))
+            Item(obj.name, (obj.x + TILE_SIZE / 2, obj.y + TILE_SIZE / 2), level_frames['items'][obj.name], (self.all_sprites, self.items_sprites), self.data)
 
                 
     def create_pearl(self, position, angle):
@@ -161,13 +164,16 @@ class Level:
                 self.player.get_damage()
                 if type(sprite) == Pearl:
                     ParticleEffect((sprite.rect.center), self.particle_frames, self.all_sprites)
+                    print('lol')
                     sprite.kill()
 
     def item_collision(self):
         if self.items_sprites:
             item_sprites = pygame.sprite.spritecollide(self.player, self.items_sprites, True)
             if item_sprites:
+                item_sprites[0].activate()
                 ParticleEffect((item_sprites[0].rect.center), self.particle_frames, self.all_sprites)
+
 
     def attack_collision(self):
         for target in self.pearl_sprites.sprites() + self.tooth_sprites.sprites():

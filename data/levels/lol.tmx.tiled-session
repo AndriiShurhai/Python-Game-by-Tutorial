@@ -1,0 +1,56 @@
+{
+    "activeFile": "4.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "4.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 355.99999999999994,
+                "y": 1242
+            }
+        },
+        "5.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 1048.6666666666665,
+                "y": 597.6666666666666
+            }
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/enemies.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/extra.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/grass.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/inside.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/items.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/objects.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/outside.tsx": {
+            "scaleInDock": 1
+        },
+        "D:/OneDrive/Робочий стіл/Python Game Tutorial/data/tilesets/platforms.tsx": {
+            "scaleInDock": 1
+        }
+    },
+    "openFiles": [
+        "5.tmx",
+        "4.tmx"
+    ],
+    "recentFiles": [
+        "5.tmx",
+        "4.tmx"
+    ]
+}

@@ -68,7 +68,7 @@ class Shell(pygame.sprite.Sprite):
 
         self.flipped = False
         
-        self.has_fired = False
+        self.has_fired = True
 
         self.create_pearl = create_pearl
 
