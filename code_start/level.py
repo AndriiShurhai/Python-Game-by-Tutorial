@@ -3,7 +3,7 @@ from sprites import Sprite, MovingSprite, AnimatedSprite, Spike
 from player import Player
 from groups import AllSprites
 from random import uniform
-from enemies import Tooth, Shell
+from enemies import Tooth, Shell, Pearl
 
 class Level:
     def __init__(self, tmx_map, level_frames):
@@ -15,6 +15,9 @@ class Level:
         self.semi_collision_sprites = pygame.sprite.Group()
         self.damage_sprites = pygame.sprite.Group()
         self.tooth_sprites = pygame.sprite.Group()
+        self.pearl_sprites = pygame.sprite.Group()
+
+        self.pearl_surface = level_frames['pearl']
 
         self.setup(tmx_map, level_frames)
 
@@ -128,11 +131,32 @@ class Level:
             if obj.name == 'tooth':
                 Tooth((obj.x, obj.y), level_frames['tooth'], (self.all_sprites, self.damage_sprites, self.tooth_sprites), self.collision_sprites)
             if obj.name == 'shell':
-                Shell((obj.x, obj.y), level_frames['shell'], (self.all_sprites, self.collision_sprites), obj.properties['reverse'], self.player)
+                self.shell = Shell(
+                    position=(obj.x, obj.y), 
+                    frames=level_frames['shell'], 
+                    groups=(self.all_sprites, self.collision_sprites), 
+                    player=self.player, 
+                    create_pearl=self.create_pearl)
+
                 
-                
+    def create_pearl(self, position, angle):
+        Pearl(position, (self.all_sprites, self.damage_sprites, self.pearl_sprites), self.pearl_surface, 200, angle)
+
+    def pearl_collision(self):
+        for sprite in self.collision_sprites:
+            if type(sprite) != Shell:
+                pygame.sprite.spritecollide(sprite, self.pearl_sprites, True)
+
+    def hit_collision(self):
+        for sprite in self.damage_sprites:
+            if sprite.rect.colliderect(self.player.hitbox_rect):
+                print('player damaged')
+                if type(sprite) == Pearl:
+                    sprite.kill()
 
     def run(self, delta_time):
         self.display_surface.fill("black")
         self.all_sprites.update(delta_time)
+        self.pearl_collision() 
+        self.hit_collision()
         self.all_sprites.draw(self.player.hitbox_rect.center)
