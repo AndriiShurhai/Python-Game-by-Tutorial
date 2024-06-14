@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, MovingSprite, AnimatedSprite, Spike, Item
+from sprites import Sprite, MovingSprite, AnimatedSprite, Spike, Item, ParticleEffect
 from player import Player
 from groups import AllSprites
 from random import uniform
@@ -19,6 +19,7 @@ class Level:
         self.items_sprites = pygame.sprite.Group()
 
         self.pearl_surface = level_frames['pearl']
+        self.particle_frames = level_frames['particle']
 
         self.setup(tmx_map, level_frames)
 
@@ -149,19 +150,23 @@ class Level:
     def pearl_collision(self):
         for sprite in self.collision_sprites:
             if type(sprite) != Shell:
-                pygame.sprite.spritecollide(sprite, self.pearl_sprites, True)
+                sprite = pygame.sprite.spritecollide(sprite, self.pearl_sprites, True)
+                if sprite:
+                    ParticleEffect((sprite[0].rect.center), self.particle_frames, self.all_sprites)
+
 
     def hit_collision(self):
         for sprite in self.damage_sprites:
             if sprite.rect.colliderect(self.player.hitbox_rect):
-                print('player damaged')
                 if type(sprite) == Pearl:
+                    ParticleEffect((sprite.rect.center), self.particle_frames, self.all_sprites)
                     sprite.kill()
+
     def item_collision(self):
         if self.items_sprites:
             item_sprites = pygame.sprite.spritecollide(self.player, self.items_sprites, True)
             if item_sprites:
-                print('collison item')
+                ParticleEffect((item_sprites[0].rect.center), self.particle_frames, self.all_sprites)
 
 
     def run(self, delta_time):
