@@ -50,7 +50,12 @@ class Game:
             'shell': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell'),
             'pearl': import_image('..', 'Python Game Tutorial', 'graphics', 'enemies', 'bullets', 'pearl'),
             'items': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'items'),
-            'particle': import_folder('..', 'Python Game Tutorial', 'graphics', 'effects', 'particle')
+            'particle': import_folder('..', 'Python Game Tutorial', 'graphics', 'effects', 'particle'),
+            'water_top': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'water', 'top'),
+            'water_body': import_image('..', 'Python Game Tutorial', 'graphics', 'level', 'water', 'body'),
+            'bg_tiles': import_folder_dict('..', 'Python Game Tutorial', 'graphics', 'level', 'bg', 'tiles'),
+            'cloud_small': import_folder('..', 'Python Game Tutorial', 'graphics', 'level' 'clouds', 'small'),
+            'cloud_large': import_image('..', 'Python Game Tutorial', 'graphics', 'level', 'clouds', 'large_cloud')
         }
 
         self.font = pygame.font.Font(join('..', 'Python Game Tutorial', 'graphics', 'ui', 'runescape_uf.ttf'), 40)
@@ -67,7 +72,7 @@ class Game:
                     pygame.QUIT
                     sys.exit()
             self.current_stage.run(delta_time)
-            #self.ui.update(delta_time)
+            self.ui.update(delta_time)
             pygame.display.update()
 
 if __name__ == '__main__':
