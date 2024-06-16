@@ -214,6 +214,7 @@ class Player(pygame.sprite.Sprite):
                     self.state = 'wall'
                 else:
                     self.state = 'jump' if self.direction.y < 0 else 'fall'
+                    
     def get_damage(self):
         if not self.timers['hit timer'].active:
             self.data.health -=1

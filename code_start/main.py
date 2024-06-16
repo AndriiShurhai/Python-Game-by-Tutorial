@@ -12,6 +12,7 @@ class Game:
         self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Pirates Adventures")
         self.clock = pygame.time.Clock()
+
         self.import_assets()
 
         self.ui = UI(self.font, self.ui_frames)
@@ -27,7 +28,7 @@ class Game:
 
         } 
 
-        self.current_stage = Level(self.tmx_maps[0], self.level_frames, self.data)
+        self.current_stage = Level(self.tmx_maps[5], self.level_frames, self.data)
 
     def import_assets(self):
         self.level_frames = {
@@ -54,7 +55,7 @@ class Game:
             'water_top': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'water', 'top'),
             'water_body': import_image('..', 'Python Game Tutorial', 'graphics', 'level', 'water', 'body'),
             'bg_tiles': import_folder_dict('..', 'Python Game Tutorial', 'graphics', 'level', 'bg', 'tiles'),
-            'cloud_small': import_folder('..', 'Python Game Tutorial', 'graphics', 'level' 'clouds', 'small'),
+            'cloud_small': import_folder('..', 'Python Game Tutorial', 'graphics', 'level', 'clouds', 'small'),
             'cloud_large': import_image('..', 'Python Game Tutorial', 'graphics', 'level', 'clouds', 'large_cloud')
         }
 

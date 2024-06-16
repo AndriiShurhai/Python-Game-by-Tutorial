@@ -1,5 +1,7 @@
 from settings import *
-from sprites import Sprite
+from sprites import Sprite, Cloud
+from manual_timer import Timer
+import random
 
 class AllSprites(pygame.sprite.Group):
     def __init__(self, width, height, clouds, horizon_line, bg_tile=None, top_limit=None):
@@ -19,13 +21,13 @@ class AllSprites(pygame.sprite.Group):
 
         self.sky = not bg_tile
 
-        if bg_tile:
+        if bg_tile != None:
             for column in range(width):
                 for row in range(-top_limit // TILE_SIZE - 1, height):
                     x=column*TILE_SIZE
                     y=row*TILE_SIZE
                     Sprite((x,y), bg_tile, self, -1)
-        else:
+        if self.sky and bg_tile == None:
             self.large_cloud = clouds['large']
             self.small_clouds = clouds['small']
 
@@ -37,12 +39,23 @@ class AllSprites(pygame.sprite.Group):
             self.large_cloud_tiles = int(self.width / self.large_cloud.get_width()) + 2
             self.large_cloud_width, self.large_cloud_height = self.large_cloud.get_size()
 
+            # small clouds
+            self.cloud_timer = Timer(2500, self.create_cloud, True)
+            self.cloud_timer.activate()
+            for cloud in range(5):
+                position = (random.randint(0, self.width), random.randint(self.borders['top'], self.horizon_line))
+                surface = random.choice(self.small_clouds)
+                Cloud(position, surface, self)
+
     def camera_constraint(self):
         self.offset.x = self.offset.x if self.offset.x < self.borders['left'] else self.borders['left']
         self.offset.x = self.offset.x if self.offset.x > self.borders['right'] else self.borders['right']
 
         self.offset.y = self.offset.y if self.offset.y > self.borders['bottom'] else self.borders['bottom']
         self.offset.y = self.offset.y if self.offset.y < self.borders['top'] else self.borders['top']
+    
+    def create_cloud(self):
+        Cloud((random.randint(self.width+400, self.width+600), random.randint(self.borders['top'], self.horizon_line)), random.choice(self.small_clouds), self)
 
     def draw_sky(self):
         self.display_surface.fill('#ddc6a1')
@@ -65,11 +78,13 @@ class AllSprites(pygame.sprite.Group):
             self.display_surface.blit(self.large_cloud, (left, top))
 
     def draw(self, target_position, delta_time):
+
         self.offset.x = -(target_position[0] - WINDOW_WIDTH / 2)
         self.offset.y = -(target_position[1] - WINDOW_HEIGHT / 2)
         self.camera_constraint()
 
         if self.sky:
+            self.cloud_timer.update()
             self.draw_sky()
             self.draw_large_cloud(delta_time)
 

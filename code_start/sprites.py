@@ -49,6 +49,7 @@ class Item(AnimatedSprite):
         self.rect.center = position
         self.item_type = item_type
         self.data = data
+
     def activate(self):
         if self.item_type == 'gold':
             self.data.coins += 5
@@ -59,8 +60,8 @@ class Item(AnimatedSprite):
         if self.item_type == 'skull':
             self.data.coins += random.randint(1, 50)
         
-        if self.item_type == 'portion':
-            self.health += 1 
+        if self.item_type == 'potion':
+            self.data.health += 1 
 
 class ParticleEffect(AnimatedSprite):
     def __init__(self, position, frames, groups):
@@ -137,10 +138,10 @@ class Spike(Sprite):
         self.end_angle = end_angle
         self.angle = self.start_angle
         self.direction = 1
-        self.full_circle = True if self.angle == -1 else False
+        self.full_circle = True if self.end_angle == -1 else False
 
-        x = self.center[0] + self.radius * math.cos(math.radians(self.angle))
-        y = self.center[1] + self.radius * math.sin(math.radians(self.angle))
+        y = self.center[1] + math.sin(math.radians(self.angle)) * self.radius
+        x = self.center[0] + math.cos(math.radians(self.angle)) * self.radius
 
         super().__init__((x, y), surface, groups, z)
 
@@ -153,8 +154,20 @@ class Spike(Sprite):
             if self.angle < self.start_angle:
                 self.direction = 1
 
-        x = self.center[0] + self.radius * math.cos(math.radians(self.angle))
-        y = self.center[1] + self.radius * math.sin(math.radians(self.angle))
+        y = self.center[1] + math.sin(math.radians(self.angle)) * self.radius
+        x = self.center[0] + math.cos(math.radians(self.angle)) * self.radius
 
         self.rect.center = (x,y)
 
+class Cloud(Sprite):
+    def __init__(self, position, surface, groups, z=Z_LAYERS['clouds']):
+        super().__init__(position, surface, groups, z)
+        self.speed = random.randint(50, 120)
+        self.direction = -1
+        self.rect.midbottom = position
+
+    def update(self, delta_time):
+        self.rect.x += self.direction * self.speed * delta_time
+
+        if self.rect.right <= 0:
+            self.kill()

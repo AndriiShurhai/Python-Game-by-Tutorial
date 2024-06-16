@@ -14,12 +14,11 @@ class Level:
         self.level_bottom = tmx_map.height * TILE_SIZE
         
         tmx_level_properties = tmx_map.get_layer_by_name('Data')[0].properties
-        print(tmx_level_properties)
         if tmx_level_properties['bg']:
             bg_tile = level_frames['bg_tiles'][tmx_level_properties['bg']]
         else:
             bg_tile = None
-
+        
         # groups
         self.all_sprites = AllSprites(
             width=tmx_map.width, 
@@ -141,7 +140,6 @@ class Level:
                 MovingSprite(frames, groups, start_pos, end_pos, move_direction, speed, move_obj.properties['flip'])
 
                 if move_obj.name == 'saw':
-                    print(move_obj.name)
                     if move_direction == 'x':
                         y = start_pos[1] - level_frames['saw_chain'].get_height() / 2 
                         left, right = int(start_pos[0]), int(end_pos[0])
@@ -199,7 +197,6 @@ class Level:
                 self.player.get_damage()
                 if type(sprite) == Pearl:
                     ParticleEffect((sprite.rect.center), self.particle_frames, self.all_sprites)
-                    print('lol')
                     sprite.kill()
 
     def item_collision(self):
