@@ -2,12 +2,13 @@ from settings import *
 from sprites import Sprite
 
 class AllSprites(pygame.sprite.Group):
-    def __init__(self, width, height, clouds, bg_tile=None, top_limit=None):
+    def __init__(self, width, height, clouds, horizon_line, bg_tile=None, top_limit=None):
         super().__init__()
         self.display_surface = pygame.display.get_surface()
         self.offset = vector()
         self.width = width * TILE_SIZE
         self.height = height * TILE_SIZE
+        self.horizon_line = horizon_line
 
         self.borders = {
             'left': 0,
@@ -15,6 +16,8 @@ class AllSprites(pygame.sprite.Group):
             'top': top_limit,
             'bottom': -self.height + WINDOW_HEIGHT,
         }
+
+        self.sky = not bg_tile
 
         if bg_tile:
             for column in range(width):
@@ -26,6 +29,14 @@ class AllSprites(pygame.sprite.Group):
             self.large_cloud = clouds['large']
             self.small_clouds = clouds['small']
 
+            self.cloud_direction = -1
+
+            # large cloud
+            self.large_cloud_speed = 50
+            self.large_cloud_x = 0
+            self.large_cloud_tiles = int(self.width / self.large_cloud.get_width()) + 2
+            self.large_cloud_width, self.large_cloud_height = self.large_cloud.get_size()
+
     def camera_constraint(self):
         self.offset.x = self.offset.x if self.offset.x < self.borders['left'] else self.borders['left']
         self.offset.x = self.offset.x if self.offset.x > self.borders['right'] else self.borders['right']
@@ -33,10 +44,35 @@ class AllSprites(pygame.sprite.Group):
         self.offset.y = self.offset.y if self.offset.y > self.borders['bottom'] else self.borders['bottom']
         self.offset.y = self.offset.y if self.offset.y < self.borders['top'] else self.borders['top']
 
-    def draw(self, target_position):
+    def draw_sky(self):
+        self.display_surface.fill('#ddc6a1')
+        horizon_position = self.horizon_line + self.offset.y
+
+        sea_rect = pygame.FRect(0, horizon_position, WINDOW_WIDTH, WINDOW_HEIGHT - horizon_position)
+        pygame.draw.rect(self.display_surface, '#92a9ce', sea_rect)
+
+        # accentuate horizone line
+        pygame.draw.line(self.display_surface, '#f5f1de', (0, horizon_position), (WINDOW_WIDTH, horizon_position), 4)
+
+    def draw_large_cloud(self, delta_time):
+        self.large_cloud_x += self.cloud_direction * self.large_cloud_speed * delta_time
+        if self.large_cloud_x <= -self.large_cloud_width:
+            self.large_cloud_x = 0
+
+        for cloud in range(self.large_cloud_tiles):
+            left = self.large_cloud_x + self.large_cloud_width * cloud + self.offset.x
+            top = self.horizon_line - self.large_cloud_height + self.offset.y
+            self.display_surface.blit(self.large_cloud, (left, top))
+
+    def draw(self, target_position, delta_time):
         self.offset.x = -(target_position[0] - WINDOW_WIDTH / 2)
         self.offset.y = -(target_position[1] - WINDOW_HEIGHT / 2)
         self.camera_constraint()
+
+        if self.sky:
+            self.draw_sky()
+            self.draw_large_cloud(delta_time)
+
 
         for sprite in sorted(self, key = lambda sprite: sprite.z):
             offset_pos = sprite.rect.topleft + self.offset
