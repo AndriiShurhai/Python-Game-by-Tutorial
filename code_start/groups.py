@@ -3,6 +3,25 @@ from sprites import Sprite, Cloud
 from manual_timer import Timer
 import random
 
+class WorldSprites(pygame.sprite.Group):
+    def __init__(self, data):
+        super().__init__()
+        self.display_surface = pygame.display.get_surface()
+        self.data = data
+        self.offset = vector()
+
+    def draw(self, target_position):
+        self.offset.x = -(target_position[0] - WINDOW_WIDTH / 2)
+        self.offset.y = -(target_position[1] - WINDOW_HEIGHT / 2)
+
+        for sprite in sorted(self, key=lambda sprite: sprite.z):
+            if sprite.z == Z_LAYERS['path']:
+                if sprite.level <= self.data.unlocked_level:
+                    self.display_surface.blit(sprite.image, offset_pos)
+            else:
+                offset_pos = sprite.rect.topleft + self.offset
+                self.display_surface.blit(sprite.image, offset_pos)
+
 class AllSprites(pygame.sprite.Group):
     def __init__(self, width, height, clouds, horizon_line, bg_tile=None, top_limit=None):
         super().__init__()

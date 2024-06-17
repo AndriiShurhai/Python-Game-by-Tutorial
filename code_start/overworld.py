@@ -1,0 +1,52 @@
+from settings import *
+from sprites import Sprite, AnimatedSprite, Node
+from groups import WorldSprites
+import random
+
+class Overworld:
+    def __init__(self, tmx_map, data, overworld_frames):
+        self.display_surface = pygame.display.get_surface()
+        self.data = data
+
+        # groups
+        self.all_sprites = WorldSprites(data)
+        self.setup(tmx_map, overworld_frames)
+
+    def setup(self, tmx_map, overworld_frames):
+        # tiles
+        for layer in ['main', 'top']:
+            for x, y, surface in tmx_map.get_layer_by_name(layer).tiles():
+                Sprite((x*TILE_SIZE, y*TILE_SIZE), surface, self.all_sprites, Z_LAYERS['bg tiles'])
+
+        # water
+        for col in range(tmx_map.width):
+            for row in range(tmx_map.height):
+                AnimatedSprite((col*TILE_SIZE, row*TILE_SIZE), overworld_frames['water'], self.all_sprites, Z_LAYERS['bg'])
+
+        # objects
+        for obj in tmx_map.get_layer_by_name('Objects'):
+            
+            if 'palm' not in obj.name:
+                z = Z_LAYERS['bg details' if obj.name == 'grass' else 'bg tiles']
+                Sprite((obj.x, obj.y), obj.image, self.all_sprites, z)
+            else:
+                z = Z_LAYERS['main']
+                AnimatedSprite((obj.x, obj.y), overworld_frames['palms'], self.all_sprites, z, random.randint(4, 6))
+
+        # nodes and player
+        for obj in tmx_map.get_layer_by_name('Nodes'):
+
+
+            # nodes
+            if obj.name == 'Node':
+                Node(
+                    position=(obj.x, obj.y),
+                    surface=overworld_frames['path']['node'], 
+                    groups=self.all_sprites,
+                    level=obj.properties['stage'],
+                    data=self.data
+                    )
+
+    def run(self, delta_time):
+        self.all_sprites.update(delta_time)
+        self.all_sprites.draw((1000, 800))

@@ -5,6 +5,7 @@ from os.path import join
 from support import *
 from data import Data
 from ui import UI
+from overworld import Overworld
 
 class Game:
     def __init__(self):
@@ -28,7 +29,9 @@ class Game:
 
         } 
 
-        self.current_stage = Level(self.tmx_maps[2], self.level_frames, self.data)
+        self.tmx_overworld = load_pygame(join('..', 'Python Game Tutorial', 'data', 'overworld', 'overworld.tmx'))
+        # self.current_stage = Level(self.tmx_maps[1], self.level_frames, self.data)
+        self.current_stage = Overworld(self.tmx_overworld, self.data, self.overworld_frames)
 
     def import_assets(self):
         self.level_frames = {
@@ -63,6 +66,12 @@ class Game:
         self.ui_frames = {
             'heart': import_folder('..', 'Python Game Tutorial', 'graphics', 'ui', 'heart'),
             'coin': import_image('..', 'Python Game Tutorial', 'graphics', 'ui', 'coin')
+        }
+
+        self.overworld_frames = {
+            'palms': import_folder('..', 'Python Game Tutorial', 'graphics', 'overworld', 'palm'),
+            'water': import_folder('..', 'Python Game Tutorial', 'graphics', 'overworld', 'water'),
+            'path': import_folder_dict('..', 'Python Game Tutorial', 'graphics', 'overworld', 'path')
         }
 
     def run(self):
