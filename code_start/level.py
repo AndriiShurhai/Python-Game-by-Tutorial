@@ -68,6 +68,7 @@ class Level:
 
         # objects
         for obj in tmx_map.get_layer_by_name('Objects'):
+            print(obj)
             if obj.name == 'player':
                 self.player = Player(
                     pos=(obj.x, obj.y), 
@@ -103,6 +104,7 @@ class Level:
         
         # moving objects
         for move_obj in tmx_map.get_layer_by_name('Moving Objects'):
+            print(move_obj)
             if move_obj.name == 'spike':
                 Spike(
                     position=(move_obj.x + move_obj.width//2, move_obj.y + move_obj.height//2),

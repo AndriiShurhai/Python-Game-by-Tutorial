@@ -185,6 +185,7 @@ class Player(pygame.sprite.Sprite):
         for sprite in [sprite for sprite in sprites if hasattr(sprite, 'moving')]:
             if sprite.rect.colliderect(floor_rect):
                 self.platform = sprite
+            
     
     def update_timers(self):
         for timer in self.timers.values():

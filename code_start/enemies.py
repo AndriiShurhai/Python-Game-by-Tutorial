@@ -48,7 +48,6 @@ class Shell(pygame.sprite.Sprite):
     def __init__(self, position, frames, groups, player, create_pearl):
         super().__init__(groups)
 
-
         self.frame_index = 0
         self.frames = frames
         self.state = 'idle'
@@ -68,7 +67,7 @@ class Shell(pygame.sprite.Sprite):
 
         self.flipped = False
         
-        self.has_fired = True
+        self.has_fired = False
 
         self.create_pearl = create_pearl
 
@@ -87,36 +86,24 @@ class Shell(pygame.sprite.Sprite):
             self.frame_index = 0
             self.shoot_timer.activate()
     
-    def angle_management(self, delta_time):
+    def angle_management(self):
         vector_to_player = pygame.math.Vector2(self.player.hitbox_rect.center) - pygame.math.Vector2(self.rect.center)
         self.angle_radians = math.atan2(vector_to_player.y, vector_to_player.x)
         self.angle_degrees = math.degrees(self.angle_radians)
 
         # Determine if the player is to the left or right of the shell
-        player_is_left = self.player.hitbox_rect.centerx < self.rect.centerx
+        self.player_is_left = self.player.hitbox_rect.centerx < self.rect.centerx
         # Check if the angle is within the specified range
         if self.start_angle <= -self.angle_degrees <= self.end_angle:
 
             # Flip the image if the player is on the other side
-            if player_is_left and not self.flipped:
+            if self.player_is_left and not self.flipped:
                 self.flipped = True
                 self.original_image = pygame.transform.flip(self.original_image, False, True)
                 
-            elif not player_is_left and self.flipped:
+            elif not self.player_is_left and self.flipped:
                 self.flipped = False
                 self.original_image = pygame.transform.flip(self.original_image, False, True)
-
-        self.frame_index += ANIMATION_SPEED * delta_time
-        if self.frame_index < len(self.frames[self.state]):
-            self.original_image = self.frames[self.state][int(self.frame_index)] if not player_is_left else pygame.transform.flip(self.frames[self.state][int(self.frame_index)], False, True)
-            if self.state == 'fire' and int(self.frame_index) == 3 and self.has_fired:
-                self.create_pearl(self.rect.center, self.angle_radians)
-                self.has_fired = False
-        else:
-            self.frame_index = 0
-            if self.state == 'fire':
-                self.state = 'idle'
-                self.has_fired = True
 
         # Rotate the original image
         self.image = pygame.transform.rotate(self.original_image, -self.angle_degrees)
@@ -126,8 +113,20 @@ class Shell(pygame.sprite.Sprite):
 
     def update(self, delta_time):
         self.shoot_timer.update()
+        self.angle_management()
         self.state_management()
-        self.angle_management(delta_time)
+
+        self.frame_index += ANIMATION_SPEED * delta_time
+        if self.frame_index < len(self.frames[self.state]):
+            self.original_image = self.frames[self.state][int(self.frame_index)] if not self.player_is_left else pygame.transform.flip(self.frames[self.state][int(self.frame_index)], False, True)
+            if self.state == 'fire' and int(self.frame_index) == 3 and not self.has_fired:
+                self.create_pearl(self.rect.center, angle=self.angle_radians)
+                self.has_fired = True
+        else:
+            self.frame_index = 0
+            if self.state == 'fire':
+                self.state = 'idle'
+                self.has_fired = False
 
 class Pearl(pygame.sprite.Sprite):
     def __init__(self, position, groups, surface, speed, angle):
@@ -149,10 +148,8 @@ class Pearl(pygame.sprite.Sprite):
             self.hit_timer.activate()
     
     def update(self, delta_time):
+        self.hit_timer.update()
+
         self.rect.x += self.velocity.x * delta_time
         self.rect.y += self.velocity.y * delta_time
-
-        if not pygame.display.get_surface().get_rect().contains(self.rect):
-            self.kill()
-            
         

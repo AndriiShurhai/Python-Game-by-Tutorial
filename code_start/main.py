@@ -28,7 +28,7 @@ class Game:
 
         } 
 
-        self.current_stage = Level(self.tmx_maps[5], self.level_frames, self.data)
+        self.current_stage = Level(self.tmx_maps[2], self.level_frames, self.data)
 
     def import_assets(self):
         self.level_frames = {
