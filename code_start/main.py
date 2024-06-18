@@ -71,7 +71,8 @@ class Game:
         self.overworld_frames = {
             'palms': import_folder('..', 'Python Game Tutorial', 'graphics', 'overworld', 'palm'),
             'water': import_folder('..', 'Python Game Tutorial', 'graphics', 'overworld', 'water'),
-            'path': import_folder_dict('..', 'Python Game Tutorial', 'graphics', 'overworld', 'path')
+            'path': import_folder_dict('..', 'Python Game Tutorial', 'graphics', 'overworld', 'path'),
+            'icon': import_sub_folders('..', 'Python Game Tutorial', 'graphics', 'overworld', 'icon')
         }
 
     def run(self):

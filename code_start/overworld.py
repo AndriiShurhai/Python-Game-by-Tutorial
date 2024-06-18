@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, AnimatedSprite, Node
+from sprites import Sprite, AnimatedSprite, Node, Icon
 from groups import WorldSprites
 import random
 
@@ -21,7 +21,7 @@ class Overworld:
         # water
         for col in range(tmx_map.width):
             for row in range(tmx_map.height):
-                AnimatedSprite((col*TILE_SIZE, row*TILE_SIZE), overworld_frames['water'], self.all_sprites, Z_LAYERS['bg'])
+                AnimatedSprite((col*TILE_SIZE-200, row*TILE_SIZE), overworld_frames['water'], self.all_sprites, Z_LAYERS['bg'])
 
         # objects
         for obj in tmx_map.get_layer_by_name('Objects'):
@@ -35,7 +35,9 @@ class Overworld:
 
         # nodes and player
         for obj in tmx_map.get_layer_by_name('Nodes'):
-
+            # player
+            if obj.name == 'Node' and obj.properties['stage'] == self.data.current_level:
+                self.icon = Icon((obj.x + TILE_SIZE//2, obj.y + TILE_SIZE//2), self.all_sprites, overworld_frames['icon'])
 
             # nodes
             if obj.name == 'Node':
@@ -46,7 +48,8 @@ class Overworld:
                     level=obj.properties['stage'],
                     data=self.data
                     )
+            
 
     def run(self, delta_time):
         self.all_sprites.update(delta_time)
-        self.all_sprites.draw((1000, 800))
+        self.all_sprites.draw(self.icon.rect.center)
