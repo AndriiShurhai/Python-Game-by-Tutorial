@@ -142,8 +142,8 @@
   <object id="103" name="tooth" gid="225" x="2490.5" y="963.5" width="48" height="46"/>
  </objectgroup>
  <objectgroup id="2" name="Water">
-  <object id="96" name="water" x="636" y="1026" width="1742" height="250"/>
-  <object id="120" x="2812.33" y="1033.33" width="646.667" height="244"/>
+  <object id="96" name="water" x="636" y="1026" width="1742" height="386.364"/>
+  <object id="120" x="2812.33" y="1033.33" width="646.667" height="380.364"/>
  </objectgroup>
  <objectgroup id="8" name="Data">
   <object id="28" name="Data" x="0" y="0" width="64" height="64">
@@ -152,7 +152,7 @@
     <property name="bottom_limit" type="int" value="400"/>
     <property name="death_border_bottom" type="int" value="0"/>
     <property name="horizon_line" type="int" value="900"/>
-    <property name="level_unlock" type="int" value="1"/>
+    <property name="level_unlock" type="int" value="2"/>
     <property name="top_limit" type="int" value="200"/>
    </properties>
   </object>
