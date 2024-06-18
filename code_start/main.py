@@ -18,6 +18,7 @@ class Game:
 
         self.ui = UI(self.font, self.ui_frames)
         self.data = Data(self.ui)
+        print(self.data)
 
         self.tmx_maps ={
             0: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', 'omni.tmx')),
