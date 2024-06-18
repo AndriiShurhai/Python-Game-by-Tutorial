@@ -26,13 +26,16 @@ class Game:
             2: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '1.tmx')),
             3: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '2.tmx' )),
             4: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '3.tmx')),
-            5: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '4.tmx'))
+            5: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '4.tmx')),
+            6: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '5.tmx')),
+            7: load_pygame(join('..', 'Python Game Tutorial', 'data', 'levels', '6.tmx'))
 
         } 
 
         self.tmx_overworld = load_pygame(join('..', 'Python Game Tutorial', 'data', 'overworld', 'overworld.tmx'))
         # self.current_stage = Level(self.tmx_maps[1], self.level_frames, self.data)
         self.current_stage = Overworld(self.tmx_overworld, self.data, self.overworld_frames)
+
 
     def import_assets(self):
         self.level_frames = {

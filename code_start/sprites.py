@@ -181,9 +181,10 @@ class Node(pygame.sprite.Sprite):
         self.level = level
         self.data = data
         self.paths = paths
+        self.grid_pos = (int(position[0] / TILE_SIZE), int(position[1] / TILE_SIZE))
     
     def can_move(self, direction):
-        if direction in list(self.paths.keys()) and int(self.paths[direction][0][0]) <= self.data.unclocked_level:
+        if direction in list(self.paths.keys()) and int(self.paths[direction][0][0]) <= self.data.unlocked_level:
             return True
 
 class Icon(pygame.sprite.Sprite):
@@ -254,3 +255,8 @@ class Icon(pygame.sprite.Sprite):
             self.rect.center += self.direction * self.speed * delta_time
         self.get_state()
         self.animate(delta_time)
+
+class PathSprite(Sprite):
+    def __init__(self, position, surface, groups, level):
+        super().__init__(position, surface, groups, Z_LAYERS['path'])
+        self.level = level

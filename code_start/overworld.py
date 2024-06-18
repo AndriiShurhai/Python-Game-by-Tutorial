@@ -1,5 +1,5 @@
 from settings import *
-from sprites import Sprite, AnimatedSprite, Node, Icon
+from sprites import Sprite, AnimatedSprite, Node, Icon, PathSprite
 from groups import WorldSprites
 import random
 
@@ -15,6 +15,10 @@ class Overworld:
         self.setup(tmx_map, overworld_frames)
 
         self.current_node = [node for node in self.node_sprites if node.level == 0][0]
+
+        self.path_frames = overworld_frames['path']
+        self.create_path_sprites()
+
 
 
     def input(self):
@@ -84,6 +88,67 @@ class Overworld:
                     data=self.data,
                     paths=available_paths 
                     )
+    def create_path_sprites(self):
+
+        # get tiles from the path
+        nodes = {node.level: vector(node.grid_pos) for node in self.node_sprites}
+        path_tiles = {}
+
+        for path_id, data in self.paths.items():
+            path = data['pos']
+            start_node, end_node = nodes[data['start']], nodes[path_id]
+            path_tiles[path_id] = [start_node]
+            
+            for index, points in enumerate(path):
+                if index < len(path)-1:
+                    start, end = vector(points), vector(path[index+1])
+                    path_direction = (end-start)/TILE_SIZE
+                    start_tile = vector(int(start[0]/TILE_SIZE), int(start[1]/TILE_SIZE))
+
+                    if path_direction.y:
+                        direction_y = 1 if path_direction.y > 0 else -1
+                        for y in range(direction_y, int(path_direction.y + direction_y), direction_y):
+                            path_tiles[path_id].append(start_tile + vector(0,y))
+
+                    if path_direction.x:
+                        direction_x = 1 if path_direction.x > 0 else -1
+                        for x in range(direction_x, int(path_direction.x + direction_x), direction_x):
+                            path_tiles[path_id].append(start_tile + vector(x, 0))
+
+            path_tiles[path_id].append(end_node)      
+    
+        # create sprites
+        for key, path in path_tiles.items():
+            for index, tile in enumerate(path):
+
+                if index > 0 and index < len(path)-1:
+                    previous_tile = path[index-1] - tile
+                    next_tile = path[index+1] - tile
+                    
+                    if previous_tile.x == next_tile.x:
+                        surface = self.path_frames['vertical']
+
+                    elif previous_tile.y == next_tile.y:
+                        surface = self.path_frames['horizontal']
+                    
+                    else:
+                        if previous_tile.x == -1 and next_tile.y == -1 or previous_tile.y == -1 and next_tile.x == -1:
+                            surface = self.path_frames['tl'] # topleft
+                        
+                        elif previous_tile.x == 1 and next_tile.y == 1 or previous_tile.y == 1 and next_tile.x == 1:
+                            surface = self.path_frames['br'] # bottomright
+
+                        elif previous_tile.x == -1 and next_tile.y == 1 or previous_tile.y == 1 and next_tile.x == -1:
+                            surface = self.path_frames['bl'] # bottomleft
+                        
+                        elif previous_tile.x == 1 and next_tile.y == -1 or previous_tile.y == -1 and next_tile.x == 1:
+                            surface = self.path_frames['tr'] # topright
+
+                        else:
+                            surface = self.path_frames['horizontal']
+
+                    PathSprite((tile.x*TILE_SIZE, tile.y*TILE_SIZE), surface, self.all_sprites, key)
+
     def get_current_node(self):
         nodes = pygame.sprite.spritecollide(self.icon, self.node_sprites, False)
         if nodes:
