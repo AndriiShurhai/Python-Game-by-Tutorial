@@ -16,7 +16,6 @@ class Level:
         tmx_level_properties = tmx_map.get_layer_by_name('Data')[0].properties
 
         self.level_unlock = tmx_level_properties['level_unlock']
-        print(tmx_level_properties)
         print(self.level_unlock)
 
         if tmx_level_properties['bg']:
@@ -235,11 +234,18 @@ class Level:
         # succes
         if self.player.hitbox_rect.colliderect(self.level_finish_rect):
             self.switch_stage('overworld', self.level_unlock)
+
+    def input(self):
+        keys=pygame.key.get_pressed()
+
+        if keys[pygame.K_END]:
+            self.switch_stage('overworld', -1)
         
 
     def run(self, delta_time):
         self.display_surface.fill("black")
         self.all_sprites.update(delta_time)
+        self.input()
         self.pearl_collision() 
         self.hit_collision()
         self.item_collision()
