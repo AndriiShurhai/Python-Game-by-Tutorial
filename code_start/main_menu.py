@@ -3,6 +3,7 @@ from button import Button
 from support import *
 from settings import *
 from game_play import game
+from options import options
 
 
 class MainMenu:
@@ -69,6 +70,10 @@ class MainMenu:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.play_button.checkForInput(menu_mouse_position):
                         game.run()
+                
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.options_button.checkForInput(menu_mouse_position):
+                        options(WINDOW_WIDTH, WINDOW_HEIGHT)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.quit_button.checkForInput(menu_mouse_position):
