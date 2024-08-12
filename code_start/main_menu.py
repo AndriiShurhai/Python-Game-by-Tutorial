@@ -48,6 +48,7 @@ class MainMenu:
     def get_font(self, size):
         return pygame.font.Font(join('..', 'Python Game Tutorial', 'graphics', 'menu', 'main_menu', 'font.ttf'), size)
 
+
     def run(self):
         pygame.display.set_caption('main menu')
 
@@ -65,6 +66,7 @@ class MainMenu:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print("looool")
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
