@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="res">
+    <file>wanted_paper.png</file>
+    <file>options_bg.jpg</file>
+  </qresource>
+</RCC>
