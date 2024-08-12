@@ -37,7 +37,7 @@ class Game:
         if target == 'level':
             self.current_stage = Level(self.tmx_maps[self.data.current_level], self.level_frames, self.data, self.switch_stage)
         elif target == 'overworld':
-            if unlock > 0:
+            if unlock > 0 and unlock > self.data.unlocked_level:
                 self.data.unlocked_level = unlock
 
             self.current_stage = Overworld(self.tmx_overworld, self.data, self.overworld_frames, self.switch_stage)
