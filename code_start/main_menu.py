@@ -1,95 +1,88 @@
-import pygame
-from button import Button
-from support import *
+import sys
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtGui import QPixmap, QFont, QIcon
+from PyQt6.QtCore import Qt
 from settings import *
-from game_play import game
-from options import options
-import threading
+from game_play import Game
+from options import Ui_MainWindow
 
-
-class MainMenu:
+class MainMenu(QMainWindow):
     def __init__(self):
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        super().__init__()
+        self.setWindowTitle('Main Menu')
+        self.setFixedSize(1280, 720)  # Set window size equivalent to your Pygame window
 
-        # images
-        self.background = import_image(join('..', 'Python Game Tutorial', 'graphics', 'menu', 'main_menu', 'Background'))
-        self.play_image = import_image(join('..', 'Python Game Tutorial', 'graphics', 'menu', 'main_menu', 'Play Rect'))
-        self.options_image = import_image(join('..', 'Python Game Tutorial', 'graphics', 'menu', 'main_menu', 'Options Rect'))
-        self.quit_image = import_image(join('..', 'Python Game Tutorial', 'graphics', 'menu', 'main_menu', 'Quit Rect'))
+        # Set background using stylesheet
+        self.setStyleSheet("""
+            QMainWindow {
+                background-image: url('../Python Game Tutorial/graphics/menu/main_menu/Background');
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+        """)
 
+        # Create central widget
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
 
-        # buttons
-        self.play_button = Button(
-            image=self.play_image, 
-            pos=(640, 250), 
-            text_input="PLAY", 
-            font=self.get_font(75), 
-            base_color="#d7fcd4", 
-            hovering_color="White"
-            ) 
+        # Create layout
+        self.layout = QVBoxLayout(self.central_widget)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.options_button = Button(
-            image=self.options_image,
-            pos=(640, 400), 
-            text_input="OPTIONS", 
-            font=self.get_font(75), 
-            base_color="#d7fcd4", 
-            hovering_color="White"
-         )
-        
-        self.quit_button = Button(
-            image=self.quit_image,
-            pos=(640, 550), 
-            text_input="QUIT", 
-            font=self.get_font(75), 
-            base_color="#d7fcd4", 
-            hovering_color="White"
-        )
+        # Title
+        self.title = QLabel('Pirates Adventure', self)
+        self.title.setFont(QFont('../Python Game Tutorial/graphics/menu/main_menu/font.ttf', 70))
+        self.title.setStyleSheet('color: #b68f40;')
+        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.title)
 
-    def get_font(self, size):
-        return pygame.font.Font(join('..', 'Python Game Tutorial', 'graphics', 'menu', 'main_menu', 'font.ttf'), size)
+        # Play Button
+        self.play_button = QPushButton(self)
+        self.play_button.setIcon(QIcon(QPixmap('../Python Game Tutorial/graphics/menu/main_menu/Play Rect')))
+        self.play_button.setText('PLAY')
+        self.play_button.setFont(QFont('../Python Game Tutorial/graphics/menu/main_menu/font.ttf', 75))
+        self.play_button.setStyleSheet('color: #d7fcd4; background-color: transparent;')
+        self.play_button.clicked.connect(self.start_game)
+        self.layout.addWidget(self.play_button)
 
+        # Options Button
+        self.options_button = QPushButton(self)
+        self.options_button.setIcon(QIcon(QPixmap('../Python Game Tutorial/graphics/menu/main_menu/Options Rect')))
+        self.options_button.setText('OPTIONS')
+        self.options_button.setFont(QFont('../Python Game Tutorial/graphics/menu/main_menu/font.ttf', 75))
+        self.options_button.setStyleSheet('color: #d7fcd4; background-color: transparent;')
+        self.options_button.clicked.connect(self.open_options)
+        self.layout.addWidget(self.options_button)
 
-    def run(self):
-        pygame.display.set_caption('main menu')
+        # Quit Button
+        self.quit_button = QPushButton(self)
+        self.quit_button.setIcon(QIcon(QPixmap('../Python Game Tutorial/graphics/menu/main_menu/Quit Rect')))
+        self.quit_button.setText('QUIT')
+        self.quit_button.setFont(QFont('../Python Game Tutorial/graphics/menu/main_menu/font.ttf', 75))
+        self.quit_button.setStyleSheet('color: #d7fcd4; background-color: transparent;')
+        self.quit_button.clicked.connect(self.close_application)
+        self.layout.addWidget(self.quit_button)
 
-        while True:
-            self.screen.blit(self.background, (0, 0))
-            menu_mouse_position = pygame.mouse.get_pos()
-            menu_text = self.get_font(70).render('Pirates Adventure', True, '#b68f40')
-            menu_rect = menu_text.get_frect(center=(640,100))
-            
-            self.screen.blit(menu_text, menu_rect)
+    def start_game(self):
+        # Here you would call your game logic
+        print('Game started')
+        self.close()
+        game = Game()
+        game.run()
 
-            for button in [self.play_button, self.options_button, self.quit_button]:
-                button.changeColor(menu_mouse_position)
-                button.update(self.screen)
+    def open_options(self):
+        print('Options opened')
+        self.options_window = QMainWindow()
+        ui = Ui_MainWindow()
+        ui.setupUi(self.options_window, WINDOW_WIDTH, WINDOW_HEIGHT)
+        self.options_window.show()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    print("looool")
-                    pygame.quit()
-                    sys.exit()
-                    
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.play_button.checkForInput(menu_mouse_position):
-                        game.run()
-                
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.options_button.checkForInput(menu_mouse_position):
-                        print(self.screen.get_size())
-                        options(WINDOW_WIDTH, WINDOW_HEIGHT, self.screen)
-                        print(self.screen.get_size())
+    def close_application(self):
+        print('Application closed')
+        self.close()
 
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.quit_button.checkForInput(menu_mouse_position):
-                        pygame.quit()
-                        sys.exit()
-
-            pygame.display.update()
-
-
-main_menu = MainMenu()
-
-main_menu.run()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    main_menu = MainMenu()
+    main_menu.show()
+    app.exec()

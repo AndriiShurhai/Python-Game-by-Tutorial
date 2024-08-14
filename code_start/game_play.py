@@ -96,5 +96,3 @@ class Game:
             self.current_stage.run(delta_time)
             self.ui.update(delta_time)
             pygame.display.update()
-
-game = Game()

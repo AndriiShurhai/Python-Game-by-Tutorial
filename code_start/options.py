@@ -479,15 +479,11 @@ class Ui_MainWindow(object):
 
 
 
-def options(WINDOW_WIDTH, WINDOW_HEIGHT, screen):
-    print(pygame.display.get_window_size())
-    app = QtWidgets.QApplication([])
-    print(pygame.display.get_window_size())
+def options(WINDOW_WIDTH, WINDOW_HEIGHT):
     MainWindow = QtWidgets.QMainWindow()
 
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow, WINDOW_WIDTH, WINDOW_HEIGHT)
     MainWindow.show()
-    app.exec()
 
-    pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    return MainWindow
