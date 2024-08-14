@@ -4,6 +4,7 @@ from support import *
 from settings import *
 from game_play import game
 from options import options
+import threading
 
 
 class MainMenu:
@@ -69,13 +70,17 @@ class MainMenu:
                     print("looool")
                     pygame.quit()
                     sys.exit()
+                    
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.play_button.checkForInput(menu_mouse_position):
                         game.run()
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.options_button.checkForInput(menu_mouse_position):
-                        options(WINDOW_WIDTH, WINDOW_HEIGHT)
+                        print(self.screen.get_size())
+                        options(WINDOW_WIDTH, WINDOW_HEIGHT, self.screen)
+                        print(self.screen.get_size())
+
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.quit_button.checkForInput(menu_mouse_position):
