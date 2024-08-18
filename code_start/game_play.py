@@ -10,7 +10,7 @@ from overworld import Overworld
 class Game:
     def __init__(self):
         pygame.init()
-        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.display_surface = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Pirates Adventures")
         self.clock = pygame.time.Clock()
 
