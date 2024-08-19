@@ -3,6 +3,36 @@ import random
 import math
 from manual_timer import Timer
 
+class HealthBar(pygame.sprite.Sprite):
+    def __init__(self, group, enemy):
+        super().__init__(group)
+        self.enemy = enemy
+        self.z = Z_LAYERS['main']
+        self.bar_width = 50
+        self.bar_height = 5
+        self.image = pygame.Surface((self.bar_width, self.bar_height))
+
+        # Positioning the health bar above the enemy
+        self.rect = pygame.rect.FRect(
+            enemy.rect.centerx - self.bar_width / 2, 
+            enemy.rect.top - self.bar_height - 5, 
+            self.bar_width, 
+            self.bar_height
+        )
+
+    def update(self, *args):
+        # Update the position based on the enemy's position
+        self.rect.topleft = (
+            self.enemy.rect.centerx - self.bar_width / 2, 
+            self.enemy.rect.top - self.bar_height - 5
+        )
+
+        # Update the health bar based on the enemy's health
+        health_ratio = self.enemy.health / 100  # Assuming max health is 100
+        self.image.fill((0, 0, 0))  # Background color
+        pygame.draw.rect(self.image, (255, 0, 0), (0, 0, self.bar_width * health_ratio, self.bar_height)) 
+
+
 class Tooth(pygame.sprite.Sprite):
     def __init__(self, position, frames, groups, collision_sprites):
         super().__init__(groups)
@@ -17,14 +47,24 @@ class Tooth(pygame.sprite.Sprite):
         self.speed = 200
 
         self.hit_timer = Timer(250)
+        self.take_damage_timer = Timer(700)
+
+        self.health = 100
 
     def reverse(self):
         if not self.hit_timer.active:
             self.direction *=-1
             self.hit_timer.activate()
+    
+    def take_damage(self, amount):
+        if not self.take_damage_timer.active:
+            self.health -= amount
+            self.take_damage_timer.activate()
+        if self.health <= 0:
+            self.kill()
 
     def update(self, delta_time):
-        
+        self.take_damage_timer.update()
         self.hit_timer.update()
         # animate
         self.frame_index += ANIMATION_SPEED * delta_time
@@ -47,7 +87,6 @@ class Tooth(pygame.sprite.Sprite):
 class Shell(pygame.sprite.Sprite):
     def __init__(self, position, frames, groups, player, create_pearl):
         super().__init__(groups)
-
         self.frame_index = 0
         self.frames = frames
         self.state = 'idle'
@@ -62,6 +101,7 @@ class Shell(pygame.sprite.Sprite):
         self.end_angle = 180
 
         self.shoot_timer = Timer(4000)
+        self.take_damage_timer = Timer(900)
 
         self.player = player
 
@@ -75,6 +115,7 @@ class Shell(pygame.sprite.Sprite):
 
         self.angle_radians = None
 
+        self.health = 75
     
     def state_management(self):
         player_position = pygame.math.Vector2(self.player.hitbox_rect.center)
@@ -111,7 +152,15 @@ class Shell(pygame.sprite.Sprite):
         # Update rect to match the new image
         self.rect = self.image.get_rect(center=self.rect.center)
 
+    def take_damage(self, amount):
+        if not self.take_damage_timer.active:
+            self.health -= amount
+            self.take_damage_timer.activate()
+        if self.health <= 0:
+            self.kill()
+
     def update(self, delta_time):
+        self.take_damage_timer.update()
         self.shoot_timer.update()
         self.angle_management()
         self.state_management()
@@ -127,6 +176,10 @@ class Shell(pygame.sprite.Sprite):
             if self.state == 'fire':
                 self.state = 'idle'
                 self.has_fired = False
+
+    def draw(self, surface):
+        super().draw(surface)
+        self.health_bar.draw(surface, self.rect.topleft)
 
 class Pearl(pygame.sprite.Sprite):
     def __init__(self, position, groups, surface, speed, angle):

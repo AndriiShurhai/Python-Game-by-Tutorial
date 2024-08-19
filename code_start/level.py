@@ -3,7 +3,7 @@ from sprites import Sprite, MovingSprite, AnimatedSprite, Spike, Item, ParticleE
 from player import Player
 from groups import AllSprites
 from random import uniform
-from enemies import Tooth, Shell, Pearl
+from enemies import Tooth, Shell, Pearl, HealthBar
 
 class Level:
     def __init__(self, tmx_map, level_frames, data, switch_stage):
@@ -160,15 +160,16 @@ class Level:
         # enemies
         for obj in tmx_map.get_layer_by_name('Enemies'):
             if obj.name == 'tooth':
-                Tooth((obj.x, obj.y), level_frames['tooth'], (self.all_sprites, self.damage_sprites, self.tooth_sprites), self.collision_sprites)
+                self.tooth = Tooth((obj.x, obj.y), level_frames['tooth'], (self.all_sprites, self.damage_sprites, self.tooth_sprites), self.collision_sprites)
+
             if obj.name == 'shell':
                 self.shell = Shell(
                     position=(obj.x, obj.y), 
                     frames=level_frames['shell'], 
                     groups=(self.all_sprites, self.collision_sprites), 
                     player=self.player, 
-                    create_pearl=self.create_pearl)
-        
+                    create_pearl=self.create_pearl,
+                    )  
         # items
         for obj in tmx_map.get_layer_by_name('Items'):
             Item(obj.name, (obj.x + TILE_SIZE / 2, obj.y + TILE_SIZE / 2), level_frames['items'][obj.name], (self.all_sprites, self.items_sprites), self.data)
@@ -214,11 +215,18 @@ class Level:
 
 
     def attack_collision(self):
-        for target in self.pearl_sprites.sprites() + self.tooth_sprites.sprites():
-            facing_target = self.player.rect.centerx < target.rect.centerx and self.player.facing_right or \
-                            self.player.rect.centerx > target.rect.centerx and not self.player.facing_right 
-            if target.rect.colliderect(self.player.rect) and self.player.attacking and facing_target:
-                target.reverse()
+        for target in self.pearl_sprites.sprites() + self.tooth_sprites.sprites() + self.collision_sprites.sprites():
+            if hasattr(target, "reverse"):
+                facing_target = self.player.rect.centerx < target.rect.centerx and self.player.facing_right or \
+                                self.player.rect.centerx > target.rect.centerx and not self.player.facing_right 
+                if target.rect.colliderect(self.player.rect) and self.player.attacking and facing_target:
+                    target.reverse()
+            if hasattr(target, "health"):
+                if target.rect.colliderect(self.player.rect) and self.player.attacking:
+                    target.take_damage(10)   # player damage
+                    if hasattr(target, "reverse"):
+                        target.reverse()
+
     
     def check_constraint(self):
         # left and right
@@ -252,3 +260,12 @@ class Level:
         self.attack_collision()
         self.check_constraint()
         self.all_sprites.draw(self.player.hitbox_rect.center, delta_time)
+        # Update and draw health bars
+        for enemy in self.tooth_sprites.sprites() + self.collision_sprites.sprites():
+            if hasattr(enemy, "health"):
+                # Find or create a health bar for the enemy
+                health_bar = getattr(enemy, "health_bar", None)
+                if not health_bar:
+                    health_bar = HealthBar(self.all_sprites, enemy)
+                    enemy.health_bar = health_bar
+                health_bar.update()

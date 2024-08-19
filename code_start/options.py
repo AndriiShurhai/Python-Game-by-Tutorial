@@ -106,17 +106,23 @@ class EnemiesTab(QtWidgets.QWidget):
         """)
         self.rightColumnLayout.addWidget(self.enemyInfo)
 
-        # Video Guide Placeholder
-        self.videoGuide = QtWidgets.QLabel("Video Guide Placeholder")
-        self.videoGuide.setFixedSize(300, 200)
-        self.videoGuide.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.videoGuide.setStyleSheet("""
+        self.videoGuideStyle = """
             border: 2px solid #3A3A3A;
             border-radius: 10px;
             background-color: #2A2A2A;
             color: #FFFFFF;
-        """)
-        self.rightColumnLayout.addWidget(self.videoGuide)
+        """
+        self.videoGuidesLayout = QtWidgets.QHBoxLayout()
+        self.videoGuidesLayout.setSpacing(20)
+        self.videoGuide = QtWidgets.QLabel("Video Guide Placeholder")
+        self.damageVideoGuide = QtWidgets.QLabel("Video Guide Placeholder")
+        self.killingVideoGuide = QtWidgets.QLabel("Video Guide Placeholder")
+
+        for videoGuide in [self.videoGuide, self.damageVideoGuide, self.killingVideoGuide]:
+            videoGuide.setFixedSize(300, 200)
+            videoGuide.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+            videoGuide.setStyleSheet(self.videoGuideStyle)
+            self.videoGuidesLayout.addWidget(videoGuide)
 
         # Navigation Buttons
         self.buttonLayout = QtWidgets.QHBoxLayout()
@@ -144,10 +150,9 @@ class EnemiesTab(QtWidgets.QWidget):
             button.setStyleSheet(button_style)
             self.buttonLayout.addWidget(button)
 
+        self.rightColumnLayout.addLayout(self.videoGuidesLayout)
         self.rightColumnLayout.addLayout(self.buttonLayout)
 
-        # Add stretch to push everything to the top
-        self.rightColumnLayout.addStretch()
 
         # Connect buttons to functions
         self.leftButton.clicked.connect(self.previous_enemy)
@@ -175,6 +180,8 @@ class EnemiesTab(QtWidgets.QWidget):
         
         # Update video guide placeholder
         self.videoGuide.setText(f"Video Guide for {enemy.name}")
+        self.damageVideoGuide.setText(f"Video Guide for {enemy.name}")
+        self.killingVideoGuide.setText(f"Video Guide for {enemy.name}")
 
     def next_enemy(self):
         self.current_enemy_index = (self.current_enemy_index + 1) % len(self.enemies)
