@@ -12,7 +12,9 @@ def import_folder(*path):
     frames = []
     for folder_path, subfolders, image_names in walk(join(*path)):
         for image_name in sorted(image_names, key = lambda name: int(name.split('.')[0])):
+            print(image_name)
             full_path = join(folder_path, image_name)
+            print(full_path)
             frames.append(pygame.image.load(full_path).convert_alpha())
     return frames 
 

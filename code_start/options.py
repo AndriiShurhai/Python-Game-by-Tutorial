@@ -1,6 +1,7 @@
 import sys
+import os
 from os.path import join
-from support import import_image
+from support import import_image,  import_folder
 from PyQt6 import QtCore, QtGui, QtWidgets
 import pygame
 
@@ -10,6 +11,17 @@ class Enemy:
         self.image_path = image_path
         self.animation_path = animation_path
         self.info = info
+        self.frames = []
+        self.frame_index = 0
+        self.animation_speed = 5
+        self.load_animation_frames()
+
+    def load_animation_frames(self):
+        if len(self.animation_path) >= 40:
+            animation_files = sorted([f for f in os.listdir(self.animation_path) if f.endswith(('.png', '.jpg', '.gif'))])
+            for frame_file in animation_files:
+                frame_path = os.path.join(self.animation_path, frame_file)
+                self.frames.append(QtGui.QPixmap(frame_path))
 
 class EnemiesTab(QtWidgets.QWidget):
     def __init__(self, enemies, parent=None):
@@ -17,6 +29,10 @@ class EnemiesTab(QtWidgets.QWidget):
         self.enemies = enemies
         self.current_enemy_index = 0
         self.setupUi()
+        self.last_update_time = QtCore.QTime.currentTime()
+        self.animation_timer = QtCore.QTimer(self)
+        self.animation_timer.timeout.connect(self.update_animation)
+        self.animation_timer.start(16)  # ~60 FPS
 
     def setupUi(self):
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -182,6 +198,20 @@ class EnemiesTab(QtWidgets.QWidget):
         self.videoGuide.setText(f"Video Guide for {enemy.name}")
         self.damageVideoGuide.setText(f"Video Guide for {enemy.name}")
         self.killingVideoGuide.setText(f"Video Guide for {enemy.name}")
+
+    def update_animation(self):
+        current_time = QtCore.QTime.currentTime()
+        delta_time = self.last_update_time.msecsTo(current_time) / 1000.0
+        self.last_update_time = current_time
+
+        enemy = self.enemies[self.current_enemy_index]
+        if enemy.frames:
+            enemy.frame_index += enemy.animation_speed * delta_time
+            frame_index = int(enemy.frame_index % len(enemy.frames))
+            current_frame = enemy.frames[frame_index]
+            self.enemyAnimationIcon.setPixmap(current_frame.scaled(200, 200, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        else:
+            self.enemyAnimationIcon.setText("No Animation Available")
 
     def next_enemy(self):
         self.current_enemy_index = (self.current_enemy_index + 1) % len(self.enemies)
@@ -594,13 +624,15 @@ class Ui_MainWindow(object):
             "Andriiko": """Андрійко — один із двох сміливих протагоністів першої частини. Після того, як він ледве вибрався з минулої пригоди, замість того щоб трохи перепочити, Андрійко, як завжди, вляпався в нові проблеми. Він має природний талант знаходити пригоди на свою голову — чи то випадково наступив на скарб, захований під носом у злого пірата, чи то забув здати лабораторну з вишмату. З його невгамовною вдачею, здається, що пригоди самі бігають за ним, як за старим другом. Він один із тих, кого можна назвати "звичайним піратом".""",
             "Flovnes": """Flovnes, Vlad, ZZZZZ. У нього багато імен. Це старий морський вовк, про якого навіть акули розповідають легенди, коли збираються на свої підводні вечірки. Кажуть, що Flovnes був настільки стародавнім піратом, що його перша борода почала сивіти ще до того, як океани на Землі наповнились водою! Озброєний таємничою іржавою шаблею, яка більше схожа на металобрухт, він називав цю зброю Rust і використовував її з такою майстерністю, що навіть інші пірати питали: "А чому це досі не розвалилось?" Але справжній страх наводив Flovnes, коли випускав лазери з очей. Місцеві рибалки навіть розповідають, що бачили, як його лазери підсмажували рибу просто у воді — така собі морська вечеря на швидку руку. Коли цей старий пірат не зайнятий підсмажуванням риби лазерами чи новими піратськими пригодами, він з насолодою вмикає свій ноутбук і грає в Dota 2. Хоч ніхто не впевнений, що з цього правда, Flovnes знову повернувся, щоби зірвати пенсіонерський капелюх і вплутатися в нові піратські пригоди. Хто знає, можливо, наступною його ціллю буде здобути золото стародавніх морських божеств чи просто знайти ідеальний пляжний крісло""",
             "Watashiva Kramar": """Крамер - колоритна фігура у світі фінансів, чия харизма та ексцентричність не знають меж. Цей велетенський чоловік з очима, що світяться азартом, давно став легендою Уолл-стріт. Його гучний сміх можна почути ще до того, як він з'явиться у полі зору, а яскраві краватки з принтами аніме-персонажів стали його фірмовою ознакою.Відомий своєю надзвичайною інтуїцією та схильністю до ризикованих, але прибуткових інвестицій, Крамер довгий час був королем "даху Барвінка" - жаргонна назва специфічного сегменту фондового ринку. Його блискучі операції з акціями принесли йому статус гуру серед молодих інвесторів та шалені статки. Однак, коли прибутковість його улюбленого сектору почала падати, Крамер не розгубився. Замість того, щоб дотримуватися традиційних шляхів, він вирішив зануритися у світ, про який завжди мріяв - світ піратських пригод. Тепер його можна побачити на розкішній яхті "Місяче САлО", названій на честь улюбленого аніме, як він розробляє стратегії для пошуку затонулих скарбів та фінансування експедицій до загублених островів.""",
-            "Vasilko": """Василько — один із двох сміливих протагоністів першої частини і справжнє втілення класичного пірата. Здавалося б, він зійшов прямо зі сторінок старих піратських романів, де у кожного героя на поясі висить шабля, а в голові — мрії про заховані скарби. Василько має все, що потрібно справжньому пірату: дерев'яну ногу (на щастя, справжня на місці, але під час бою Василько завжди тримає запасну), папугу, який ніколи не мовчить, і безліч історій про свої «величні» морські подвиги. Але не дайте себе обманути його класичним образом — Василько вміє не тільки хвацько розмахувати шаблею, але й знайти скарб там, де його навіть не мали б заховати. Він настільки звик до піратського життя, що його кожен день починається з того, що він кричить «Йо-хо-хо!» у дзеркало, наче це його ранковий ритуал."""
+            "Vasilko": """Василько — один із двох сміливих протагоністів першої частини і справжнє втілення класичного пірата. Здавалося б, він зійшов прямо зі сторінок старих піратських романів, де у кожного героя на поясі висить шабля, а в голові — мрії про заховані скарби. Василько має все, що потрібно справжньому пірату: дерев'яну ногу (на щастя, справжня на місці, але під час бою Василько завжди тримає запасну), папугу, який ніколи не мовчить, і безліч історій про свої «величні» морські подвиги. Але не дайте себе обманути його класичним образом — Василько вміє не тільки хвацько розмахувати шаблею, але й знайти скарб там, де його навіть не мали б заховати. Він настільки звик до піратського життя, що його кожен день починається з того, що він кричить «Йо-хо-хо!» у дзеркало, наче це його ранковий ритуал.""",
+            "Levchenko":"""Капітан Левченко "Лего-Мозок" - Це морський вовк який має унікальну суперсилу - перетворювати будь-який непотріб на борту в неймовірні винаходи з Лего. Його каюта більше нагадує майстерню божевільного винахідника, де з конструктора народжуються механічні папуги, що розмовляють, гарматні ядра з пропелерами та навіть підводний човен для втечі від акул.Коли Левченко не зайнятий своїми геніальними винаходами, він з головою поринає у віртуальні битви. Його можна побачити, як він люто тицяє пальцем у екран свого смартфона, намагаючись здобути чергову перемогу в Clash Royale. Горе тому нещасному члену команди, який насмілиться перервати капітана під час його ігрової сесії! Особливо якщо в цей момент якийсь "нікчемний гриб" (як він їх називає) зруйнував його ідеальну стратегію.Левченко щиро вірить, що він - найбагатший пірат в історії. Щоправда, його "скарби" складаються з величезної колекції фігурок з Лего, віртуальних монет у Kingdom Rush та кількох засмальцьованих купюр невідомої валюти. Але хто насмілиться сказати капітану, що його "мільйони" існують лише в його уяві?"""
         }
         self.square_icons = {
             "Andriiko": '',
             "Flovnes": join('..', 'Python Game Tutorial', 'graphics', 'options', 'flovnes_square'),
             "Watashiva Kramar": join('..', 'Python Game Tutorial', 'graphics', 'options', 'kramar_square'),
             "Vasilko": join('..', 'Python Game Tutorial', 'graphics', 'options', 'vasilko_square'),
+            "Levchenko": join('..', 'Python Game Tutorial', 'graphics', 'options', 'levchenko_square'),
         }
 
         self.rect_icons = {
@@ -608,19 +640,20 @@ class Ui_MainWindow(object):
             "Flovnes": join('..', 'Python Game Tutorial', 'graphics', 'options', 'flovnes_square'),
             "Watashiva Kramar": join('..', 'Python Game Tutorial', 'graphics', 'options', 'kramar_square'),
             "Vasilko": join('..', 'Python Game Tutorial', 'graphics', 'options', 'vasilko_rect'),
+            "Levchenko": '',
         }
         self.players = [
             CurrentPlayer("Vasilko", self.square_icons["Vasilko"], self.rect_icons["Vasilko"], self.informations["Vasilko"]),
             CurrentPlayer("Andriiko", "path/to/square1.png", "path/to/vertical1.png", self.informations["Andriiko"]),
             CurrentPlayer("Flovnes", self.square_icons["Flovnes"], "path/to/vertical2.png", self.informations["Flovnes"]),
             CurrentPlayer("Watashiva Kramar", self.square_icons["Watashiva Kramar"], "path/to/vertical3.png", self.informations["Watashiva Kramar"]),
+            CurrentPlayer("Levchenko", self.square_icons["Levchenko"], self.rect_icons["Levchenko"], self.informations["Levchenko"])
         ]
 
         # Create some enemy instances
         self.enemies = [
-            Enemy("Tooth", "path/to/goblin_image.png", "path/to/goblin_animation.gif", "Tooth info."),
-            Enemy("Shell", "path/to/dragon_image.png", "path/to/dragon_animation.gif", "Shell info."),
-            Enemy("Spike", "path/to/troll_image.png", "path/to/troll_animation.gif", "Spike info.")
+            Enemy("Tooth", join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run', '2.png'), join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run'), "Tooth info."),
+            Enemy("Shell", join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell', 'fire', '0.png'), join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell', 'fire'), "Shell info."),
         ]
 
         # Add tabs
