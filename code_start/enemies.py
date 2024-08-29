@@ -100,7 +100,7 @@ class Shell(pygame.sprite.Sprite):
         self.start_angle = 0
         self.end_angle = 180
 
-        self.shoot_timer = Timer(4000)
+        self.shoot_timer = Timer(3000)
         self.take_damage_timer = Timer(900)
 
         self.player = player

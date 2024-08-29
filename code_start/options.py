@@ -1,4 +1,5 @@
 import sys
+import json
 import os
 from os.path import join
 from support import import_image,  import_folder
@@ -111,7 +112,6 @@ class EnemiesTab(QtWidgets.QWidget):
         self.enemyInfo = QtWidgets.QTextEdit()
         self.enemyInfo.setReadOnly(True)
         self.enemyInfo.setText("Enemy Information")
-        self.enemyInfo.setFixedHeight(200)
         self.enemyInfo.setStyleSheet("""
             background-color: #2A2A2A;
             color: #FFFFFF;
@@ -414,9 +414,9 @@ class AudioTab(QtWidgets.QWidget):
 
         # Main volume control
         volume_label = QtWidgets.QLabel("Volume:")
-        volume_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         layout.addWidget(volume_label)
-        layout.addWidget(volume_slider)
+        layout.addWidget(self.volume_slider)
 
         # Checkboxes for audio control
         checkbox_style = """
@@ -450,6 +450,10 @@ class AudioTab(QtWidgets.QWidget):
         self.game_sounds_cb.setStyleSheet(checkbox_style)
         layout.addWidget(self.game_sounds_cb)
 
+        self.main_menu_music_cb.setChecked(True)
+        self.game_music_cb.setChecked(True)
+        self.game_sounds_cb.setChecked(True)
+
         # Connect checkboxes to functions
         self.main_menu_music_cb.stateChanged.connect(self.toggle_main_menu_music)
         self.game_music_cb.stateChanged.connect(self.toggle_game_music)
@@ -458,17 +462,96 @@ class AudioTab(QtWidgets.QWidget):
         # Add stretch to push everything to the top
         layout.addStretch()
 
+        # Volume control
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.setValue(50)
+        self.volume_slider.valueChanged.connect(self.adjust_volume)
+
+        # Balance control
+        balance_label = QtWidgets.QLabel("Balance:")
+        self.balance_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.balance_slider.setRange(-50, 50)
+        self.balance_slider.setValue(0)
+        self.balance_slider.valueChanged.connect(self.adjust_balance)
+        layout.addWidget(balance_label)
+        layout.addWidget(self.balance_slider)
+
+        # Reset button
+        reset_button = QtWidgets.QPushButton("Reset to Default")
+        reset_button.clicked.connect(self.reset_to_default)
+        layout.addWidget(reset_button)
+
+        # Set tooltips
+        self.volume_slider.setToolTip("Adjust the overall volume")
+        self.balance_slider.setToolTip("Adjust the left-right balance")
+        self.main_menu_music_cb.setToolTip("Toggle music in the main menu")
+        self.game_music_cb.setToolTip("Toggle music during gameplay")
+        self.game_sounds_cb.setToolTip("Toggle sound effects during gameplay")
+
+        self.load_config()
+
+    def adjust_volume(self, value):
+        print(f"Volume adjusted to {value}%")
+        # Implement actual volume adjustment here
+        self.save_config()
+        self.load_config()
+
+
+    def adjust_balance(self, value):
+        print(f"Balance adjusted to {value}")
+        # Implement actual balance adjustment here
+        self.save_config()
+        self.load_config()
+
+    def reset_to_default(self):
+        self.volume_slider.setValue(50)
+        self.balance_slider.setValue(0)
+        self.main_menu_music_cb.setChecked(True)
+        self.game_music_cb.setChecked(True)
+        self.game_sounds_cb.setChecked(True)
+        self.save_config()
+        self.load_config()
+
+    def load_config(self):
+        try:
+            with open('audio_config.json', 'r') as f:
+                config = json.load(f)
+            self.volume_slider.setValue(config['volume'])
+            self.balance_slider.setValue(config['balance'])
+            self.main_menu_music_cb.setChecked(config['main_menu_music'])
+            self.game_music_cb.setChecked(config['game_music'])
+            self.game_sounds_cb.setChecked(config['game_sounds'])
+        except FileNotFoundError:
+            print("Config file not found. Using default settings.")
+
+    def save_config(self):
+        config = {
+            'volume': self.volume_slider.value(),
+            'balance': self.balance_slider.value(),
+            'main_menu_music': self.main_menu_music_cb.isChecked(),
+            'game_music': self.game_music_cb.isChecked(),
+            'game_sounds': self.game_sounds_cb.isChecked()
+        }
+        with open('audio_config.json', 'w') as f:
+            json.dump(config, f)
+
     def toggle_main_menu_music(self, state):
         # Implement the logic to enable/disable main menu music
         print(f"Main menu music {'enabled' if state == QtCore.Qt.CheckState.Checked else 'disabled'}")
+        self.save_config()
+        self.load_config()
 
     def toggle_game_music(self, state):
         # Implement the logic to enable/disable game music
         print(f"Game music {'enabled' if state == QtCore.Qt.CheckState.Checked else 'disabled'}")
+        self.save_config()
+        self.load_config()
 
     def toggle_game_sounds(self, state):
         # Implement the logic to enable/disable game sounds
         print(f"Game sounds {'enabled' if state == QtCore.Qt.CheckState.Checked else 'disabled'}")
+        self.save_config()
+        self.load_config()
 
 class MovementGuideTab(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -625,7 +708,9 @@ class Ui_MainWindow(object):
             "Flovnes": """Flovnes, Vlad, ZZZZZ. У нього багато імен. Це старий морський вовк, про якого навіть акули розповідають легенди, коли збираються на свої підводні вечірки. Кажуть, що Flovnes був настільки стародавнім піратом, що його перша борода почала сивіти ще до того, як океани на Землі наповнились водою! Озброєний таємничою іржавою шаблею, яка більше схожа на металобрухт, він називав цю зброю Rust і використовував її з такою майстерністю, що навіть інші пірати питали: "А чому це досі не розвалилось?" Але справжній страх наводив Flovnes, коли випускав лазери з очей. Місцеві рибалки навіть розповідають, що бачили, як його лазери підсмажували рибу просто у воді — така собі морська вечеря на швидку руку. Коли цей старий пірат не зайнятий підсмажуванням риби лазерами чи новими піратськими пригодами, він з насолодою вмикає свій ноутбук і грає в Dota 2. Хоч ніхто не впевнений, що з цього правда, Flovnes знову повернувся, щоби зірвати пенсіонерський капелюх і вплутатися в нові піратські пригоди. Хто знає, можливо, наступною його ціллю буде здобути золото стародавніх морських божеств чи просто знайти ідеальний пляжний крісло""",
             "Watashiva Kramar": """Крамер - колоритна фігура у світі фінансів, чия харизма та ексцентричність не знають меж. Цей велетенський чоловік з очима, що світяться азартом, давно став легендою Уолл-стріт. Його гучний сміх можна почути ще до того, як він з'явиться у полі зору, а яскраві краватки з принтами аніме-персонажів стали його фірмовою ознакою.Відомий своєю надзвичайною інтуїцією та схильністю до ризикованих, але прибуткових інвестицій, Крамер довгий час був королем "даху Барвінка" - жаргонна назва специфічного сегменту фондового ринку. Його блискучі операції з акціями принесли йому статус гуру серед молодих інвесторів та шалені статки. Однак, коли прибутковість його улюбленого сектору почала падати, Крамер не розгубився. Замість того, щоб дотримуватися традиційних шляхів, він вирішив зануритися у світ, про який завжди мріяв - світ піратських пригод. Тепер його можна побачити на розкішній яхті "Місяче САлО", названій на честь улюбленого аніме, як він розробляє стратегії для пошуку затонулих скарбів та фінансування експедицій до загублених островів.""",
             "Vasilko": """Василько — один із двох сміливих протагоністів першої частини і справжнє втілення класичного пірата. Здавалося б, він зійшов прямо зі сторінок старих піратських романів, де у кожного героя на поясі висить шабля, а в голові — мрії про заховані скарби. Василько має все, що потрібно справжньому пірату: дерев'яну ногу (на щастя, справжня на місці, але під час бою Василько завжди тримає запасну), папугу, який ніколи не мовчить, і безліч історій про свої «величні» морські подвиги. Але не дайте себе обманути його класичним образом — Василько вміє не тільки хвацько розмахувати шаблею, але й знайти скарб там, де його навіть не мали б заховати. Він настільки звик до піратського життя, що його кожен день починається з того, що він кричить «Йо-хо-хо!» у дзеркало, наче це його ранковий ритуал.""",
-            "Levchenko":"""Капітан Левченко "Лего-Мозок" - Це морський вовк який має унікальну суперсилу - перетворювати будь-який непотріб на борту в неймовірні винаходи з Лего. Його каюта більше нагадує майстерню божевільного винахідника, де з конструктора народжуються механічні папуги, що розмовляють, гарматні ядра з пропелерами та навіть підводний човен для втечі від акул.Коли Левченко не зайнятий своїми геніальними винаходами, він з головою поринає у віртуальні битви. Його можна побачити, як він люто тицяє пальцем у екран свого смартфона, намагаючись здобути чергову перемогу в Clash Royale. Горе тому нещасному члену команди, який насмілиться перервати капітана під час його ігрової сесії! Особливо якщо в цей момент якийсь "нікчемний гриб" (як він їх називає) зруйнував його ідеальну стратегію.Левченко щиро вірить, що він - найбагатший пірат в історії. Щоправда, його "скарби" складаються з величезної колекції фігурок з Лего, віртуальних монет у Kingdom Rush та кількох засмальцьованих купюр невідомої валюти. Але хто насмілиться сказати капітану, що його "мільйони" існують лише в його уяві?"""
+            "Levchenko":"""Капітан Левченко "Лего-Мозок" - Це морський вовк який має унікальну суперсилу - перетворювати будь-який непотріб на борту в неймовірні винаходи з Лего. Його каюта більше нагадує майстерню божевільного винахідника, де з конструктора народжуються механічні папуги, що розмовляють, гарматні ядра з пропелерами та навіть підводний човен для втечі від акул.Коли Левченко не зайнятий своїми геніальними винаходами, він з головою поринає у віртуальні битви. Його можна побачити, як він люто тицяє пальцем у екран свого смартфона, намагаючись здобути чергову перемогу в Clash Royale. Горе тому нещасному члену команди, який насмілиться перервати капітана під час його ігрової сесії! Особливо якщо в цей момент якийсь "нікчемний гриб" (як він їх називає) зруйнував його ідеальну стратегію.Левченко щиро вірить, що він - найбагатший пірат в історії. Щоправда, його "скарби" складаються з величезної колекції фігурок з Лего, віртуальних монет у Kingdom Rush та кількох засмальцьованих купюр невідомої валюти. Але хто насмілиться сказати капітану, що його "мільйони" існують лише в його уяві?""",
+            "Tooth": """Цей кругленький зубастик не може визначитися, куди ж йому подітися, тому постійно снує туди-сюди, наче маятник на старовинному годиннику капітана. Його улюблене заняття - бігати по колу, ніби він намагається зловити власний хвіст (якби він у нього був). Легенда свідчить, що він з'явився після того, як древній морський чарівник випадково оживив зуб гігантської акули.\nОсобливості:\n1.Постійний рух: Tooth невтомно бігає по колу, ніби намагається втекти від зубного болю.\n2.Життєдайні укуси: При зіткненні з піратом, Tooth "кусає" його, забираючи одне життя. Пірати жартують, що це помста за всі ті зуби, які вони втратили в бійках.\n3.Боязкий відступ: Якщо пірат атакує Tooth, той миттєво змінює напрямок руху, ніби згадавши про важливу зустріч на іншому кінці острова.\nЦікаві факти:\n1.Моряки вірять, що Tooth - це втілення духу всіх загублених зубів піратів.\n2.Деякі капітани використовують зображення Tooth на своїх прапорах, щоб відлякувати забобонних ворогів.\n3.Існує повір'я, що якщо пірату вдасться спіймати Tooth, то він ніколи більше не матиме проблем із зубами.""",
+            "Shell": """Це підступний страж піратських скарбів, відомий своєю неперевершеною точністю та терпінням. Цей хитрий молюск обрав тактику "стій та стріляй", перетворивши свою мушлю на неприступну фортецю.\nОсобливості:\n1.Нерухомий вартовий: Shell ніколи не покидає свого посту. Він вірить, що справжній воїн не бігає за здобиччю, а чекає, коли вона сама прийде до нього.\n2.Прицільна стрільба: Кожні три секунди Shell випускає перлину з хірургічною точністю. Він пишається тим, що жодна перлина не витрачена даремно.\n3.Зона ураження: Якщо ви потрапили в поле зору Shell, вважайте, що ви вже на мушці. Його очі-перископи не пропустять жодного руху.\n4.Перлинний град: Перлини Shell - це не просто прикраси. Кожна з них може відправити пірата "годувати риб".\n5.Відбивання атак: Shell грає в теніс? Ні, але якщо ви відіб'єте його перлину, вона полетить в іншому напрямку. Може, пощастить, і вона влучить у його товариша!\n6.Ахіллесова п'ята: Єдиний спосіб здолати цього молюска - це близький бій. Тільки гострий меч може пробити його захист.\nЦікаві факти\n1.Кажуть, що Shell колись був звичайною устрицею, але після того, як проковтнув магічну перлину, він виріс до неймовірних розмірів і отримав свої здібності.\n2.Пірати жартують, що якщо зібрати всі перлини, якими стріляв Shell, можна було б купити цілий флот кораблів.\n3.Деякі сміливці намагалися використовувати Shell як гарматну установку, прив'язавши його до корабля. Результат експерименту досі невідомий, як і доля експериментаторів."""
         }
         self.square_icons = {
             "Andriiko": '',
@@ -652,9 +737,10 @@ class Ui_MainWindow(object):
 
         # Create some enemy instances
         self.enemies = [
-            Enemy("Tooth", join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run', '2.png'), join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run'), "Tooth info."),
-            Enemy("Shell", join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell', 'fire', '0.png'), join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell', 'fire'), "Shell info."),
+            Enemy("Tooth", join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run', '2.png'), join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'tooth', 'run'), self.informations["Tooth"]),
+            Enemy("Shell", join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell', 'fire', '0.png'), join('..', 'Python Game Tutorial', 'graphics', 'enemies', 'shell', 'fire'), self.informations["Shell"]),
         ]
+
 
         # Add tabs
         self.settingsTab = SettingsTab(self.players)
